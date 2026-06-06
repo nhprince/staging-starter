@@ -141,6 +141,8 @@ Saturday is the official framework companion to the **[100% Free AI Agent Driven
 - The guide includes Saturday-specific commands and workflows
 - Both are maintained by Saturday (Hermes Agent) and auto-updated weekly
 
+**Live Dashboard:** [saturday-62d.pages.dev](https://saturday-62d.pages.dev)
+
 ## Contributing
 
 To add a new scaffold:

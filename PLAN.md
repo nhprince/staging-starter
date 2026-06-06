@@ -370,7 +370,7 @@ Saturday:
 ## ✅ Build Status
 
 All 12 phases complete. Latest GitHub Actions run: **SUCCESS** (commit `1ca53a1`).
-- Frontend: https://saturday.pages.dev ✅
+- Frontend: https://saturday-62d.pages.dev ✅
 - Backend: https://saturday.nurulhudaprince18.workers.dev ✅
 - TypeScript: Clean build (`tsc --noEmit` passes)
 

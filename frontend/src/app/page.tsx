@@ -30,7 +30,7 @@ const SAMPLE_PROJECTS: Project[] = [
     name: "saturday",
     type: "Framework",
     status: "healthy",
-    frontendUrl: "https://saturday.pages.dev",
+    frontendUrl: "https://saturday-62d.pages.dev",
     backendUrl: "https://saturday.nurulhudaprince18.workers.dev",
     githubUrl: "https://github.com/nhprince/saturday",
     lastDeploy: "2 hours ago",

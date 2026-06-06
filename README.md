@@ -155,6 +155,8 @@ This framework works seamlessly with the **[100% Free AI Agent Driven Developmen
 - ✅ Then use Saturday to build projects with 100% free infrastructure
 - ✅ The guide includes Saturday-specific commands and workflows
 
+**Live Dashboard:** [saturday-62d.pages.dev](https://saturday-62d.pages.dev)
+
 **Recommended next step:** [Follow the server setup guide →](https://github.com/nhprince/server-setup-guide)
 
 > **🤖 Agent Tip:** Just say *"Set up my VPS using the AI Agent guide"* and Saturday will handle all the server configuration automatically.
