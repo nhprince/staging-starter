@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 interface TestResult {
   name: string;
@@ -19,589 +19,617 @@ interface TestSuite {
 const BACKEND_URL = "https://staging-starter.nurulhudaprince18.workers.dev";
 const FRONTEND_URL = "https://staging-starter.pages.dev";
 
+/* ===== SVG SCORE RING ===== */
+function ScoreRing({ score, total }: { score: number; total: number }) {
+  const pct = total === 0 ? 0 : Math.round((score / total) * 100);
+  const radius = 58;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (pct / 100) * circumference;
+
+  const color =
+    pct >= 90
+      ? { stroke: "#34d399", glow: "rgba(52,211,153,0.3)" }
+      : pct >= 70
+      ? { stroke: "#fbbf24", glow: "rgba(251,191,36,0.3)" }
+      : { stroke: "#f87171", glow: "rgba(248,113,113,0.3)" };
+
+  return (
+    <div className="score-ring">
+      <svg width="140" height="140" viewBox="0 0 140 140">
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <circle className="bg" cx="70" cy="70" r={radius} />
+        <circle
+          className="progress"
+          cx="70"
+          cy="70"
+          r={radius}
+          stroke={color.stroke}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          filter="url(#glow)"
+          style={{ filter: `drop-shadow(0 0 6px ${color.glow})` }}
+        />
+      </svg>
+      <div className="score-value">
+        <span className="text-3xl font-black" style={{ color: color.stroke }}>
+          {pct}%
+        </span>
+        <span className="text-xs text-[var(--text-muted)] mt-1 font-medium">
+          {score}/{total} passed
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ===== STATUS DOT ===== */
+function StatusDot({ status }: { status: TestResult["status"] }) {
+  const colorMap = {
+    pending: "yellow",
+    running: "indigo",
+    pass: "green",
+    fail: "red",
+    warn: "yellow",
+  } as const;
+  return (
+    <span className={`dot-pulse ${colorMap[status]}`} />
+  );
+}
+
+/* ===== STATUS BADGE ===== */
 function StatusBadge({ status }: { status: TestResult["status"] }) {
-  const styles = {
-    pending: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
-    running: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300 animate-pulse",
-    pass: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
-    fail: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-    warn: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300",
-  };
-  const labels = {
-    pending: "⏳ Pending",
-    running: "🔄 Running",
-    pass: "✅ Pass",
-    fail: "❌ Fail",
-    warn: "⚠️ Warning",
+  const config = {
+    pending: { label: "Pending", cls: "status-pending" },
+    running: { label: "Running", cls: "status-running" },
+    pass: { label: "Passed", cls: "status-pass" },
+    fail: { label: "Failed", cls: "status-fail" },
+    warn: { label: "Warning", cls: "status-warn" },
   };
   return (
-    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${styles[status]}`}>
-      {labels[status]}
+    <span className={`status-badge ${config[status].cls}`}>
+      <StatusDot status={status} />
+      {config[status].label}
     </span>
   );
 }
 
-function TestCard({ test }: { test: TestResult }) {
-  const borderColors = {
-    pending: "border-gray-200 dark:border-gray-800",
-    running: "border-blue-300 dark:border-blue-700",
-    pass: "border-green-300 dark:border-green-700",
-    fail: "border-red-300 dark:border-red-700",
-    warn: "border-yellow-300 dark:border-yellow-700",
-  };
+/* ===== PROGRESS BAR ===== */
+function SuiteProgressBar({ suite }: { suite: TestSuite }) {
+  const completed = suite.tests.filter((t) => t.status !== "pending" && t.status !== "running").length;
+  const passed = suite.tests.filter((t) => t.status === "pass").length;
+  const failed = suite.tests.filter((t) => t.status === "fail").length;
+  const total = suite.tests.length;
+  const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
+
   return (
-    <div className={`p-4 rounded-lg border ${borderColors[test.status]} bg-white dark:bg-gray-900 transition-all`}>
-      <div className="flex items-center justify-between mb-2">
-        <span className="font-medium text-sm">{test.name}</span>
-        <StatusBadge status={test.status} />
+    <div className="progress-bar w-full mb-4">
+      <div className="flex h-full">
+        {passed > 0 && (
+          <div
+            className="progress-bar-fill"
+            style={{
+              width: `${(passed / total) * 100}%`,
+              background: "var(--gradient-success)",
+            }}
+          />
+        )}
+        {failed > 0 && (
+          <div
+            className="progress-bar-fill"
+            style={{
+              width: `${(failed / total) * 100}%`,
+              background: "var(--gradient-danger)",
+            }}
+          />
+        )}
+        {completed < total && (
+          <div
+            style={{
+              width: `${(pct)}%`,
+            }}
+          />
+        )}
       </div>
-      <p className="text-sm text-gray-600 dark:text-gray-400">{test.message}</p>
-      {test.duration !== undefined && (
-        <p className="text-xs text-gray-400 mt-1">⏱ {test.duration}ms</p>
-      )}
-      {test.details && (
-        <pre className="mt-2 text-xs bg-gray-50 dark:bg-gray-800 p-2 rounded overflow-x-auto text-gray-500 dark:text-gray-400">
-          {test.details}
-        </pre>
+    </div>
+  );
+}
+
+/* ===== TEST CARD ===== */
+function TestCard({ test, index }: { test: TestResult; index: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasDetails = !!test.details;
+
+  return (
+    <div
+      className={`test-card stagger-item status-${test.status}`}
+      style={{ animationDelay: `${index * 60}ms` }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className={`status-dot status-${test.status}`} />
+          <span className="font-medium text-sm truncate">{test.name}</span>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {test.duration !== undefined && (
+            <span className="text-[10px] font-mono text-[var(--text-muted)] tabular-nums">
+              {test.duration}ms
+            </span>
+          )}
+          <StatusBadge status={test.status} />
+        </div>
+      </div>
+      <p className="text-xs text-[var(--text-secondary)] mt-1.5 ml-5 leading-relaxed">
+        {test.message}
+      </p>
+      {hasDetails && (
+        <>
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="text-[10px] text-[var(--accent-indigo)] mt-2 ml-5 hover:underline cursor-pointer transition-colors"
+          >
+            {expanded ? "▾ Hide details" : "▸ Show details"}
+          </button>
+          <div className={`details-expand ${expanded ? "open" : ""}`}>
+            <div className="code-block mt-2 ml-5">{test.details}</div>
+          </div>
+        </>
       )}
     </div>
   );
 }
 
-function SuiteSection({ suite }: { suite: TestSuite }) {
+/* ===== SUITE SECTION ===== */
+function SuiteSection({ suite, index }: { suite: TestSuite; index: number }) {
   const passed = suite.tests.filter((t) => t.status === "pass").length;
   const failed = suite.tests.filter((t) => t.status === "fail").length;
   const warnings = suite.tests.filter((t) => t.status === "warn").length;
   const total = suite.tests.length;
 
   return (
-    <div className="mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold flex items-center gap-2">
-          <span>{suite.icon}</span>
+    <div
+      className="glass-card p-5 md:p-6 stagger-item"
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      <div className="section-header">
+        <h2 className="text-base font-bold flex items-center gap-2.5">
+          <span className="text-lg">{suite.icon}</span>
           {suite.category}
+          <span className="text-[10px] font-medium text-[var(--text-muted)] bg-white/5 px-2 py-0.5 rounded-full ml-1">
+            {total} tests
+          </span>
         </h2>
-        <div className="flex gap-2 text-xs">
-          <span className="text-green-600 dark:text-green-400">{passed} passed</span>
-          {failed > 0 && <span className="text-red-600 dark:text-red-400">{failed} failed</span>}
-          {warnings > 0 && <span className="text-yellow-600 dark:text-yellow-400">{warnings} warnings</span>}
-          <span className="text-gray-400">/ {total}</span>
+        <div className="flex gap-3 text-[11px] font-medium">
+          <span className="text-[var(--accent-green)]">{passed} passed</span>
+          {failed > 0 && (
+            <span className="text-[var(--accent-red)]">{failed} failed</span>
+          )}
+          {warnings > 0 && (
+            <span className="text-[var(--accent-yellow)]">{warnings} warn</span>
+          )}
         </div>
       </div>
-      <div className="grid gap-3">
+      <SuiteProgressBar suite={suite} />
+      <div className="flex flex-col gap-2">
         {suite.tests.map((test, i) => (
-          <TestCard key={i} test={test} />
+          <TestCard key={i} test={test} index={i} />
         ))}
       </div>
     </div>
   );
 }
 
-function ScoreCircle({ score, total }: { score: number; total: number }) {
-  const pct = total === 0 ? 0 : Math.round((score / total) * 100);
-  const color =
-    pct >= 90 ? "text-green-500" : pct >= 70 ? "text-yellow-500" : "text-red-500";
-  return (
-    <div className="flex flex-col items-center justify-center p-6">
-      <div className={`text-6xl font-black ${color}`}>{pct}%</div>
-      <div className="text-sm text-gray-500 mt-1">
-        {score}/{total} tests passed
-      </div>
-    </div>
-  );
-}
-
+/* ===== MAIN PAGE ===== */
 export default function Home() {
   const [suites, setSuites] = useState<TestSuite[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [lastRun, setLastRun] = useState<string | null>(null);
+  const [startTime, setStartTime] = useState<number | null>(null);
+
+  const updateTest = (
+    sIdx: number,
+    tIdx: number,
+    update: Partial<TestResult>
+  ) => {
+    setSuites((prev) => {
+      const next = JSON.parse(JSON.stringify(prev)) as TestSuite[];
+      next[sIdx].tests[tIdx] = { ...next[sIdx].tests[tIdx], ...update };
+      return next;
+    });
+  };
 
   const runTests = useCallback(async () => {
     setIsRunning(true);
+    setStartTime(Date.now());
 
-    // Initialize all suites with pending state
-    const initialSuites: TestSuite[] = [
+    const initial: TestSuite[] = [
       {
         category: "Frontend",
         icon: "🎨",
         tests: [
-          { name: "Page Load", status: "pending", message: "Checking if page loads..." },
-          { name: "Static Assets", status: "pending", message: "Verifying static file serving..." },
-          { name: "Responsive Meta", status: "pending", message: "Checking viewport meta tag..." },
-          { name: "Dark Mode Support", status: "pending", message: "Verifying dark mode CSS..." },
+          { name: "Page Load", status: "pending", message: "Verifying page delivery..." },
+          { name: "Static Assets", status: "pending", message: "Checking asset references..." },
+          { name: "Viewport Meta", status: "pending", message: "Responsive meta tag..." },
+          { name: "Dark Mode CSS", status: "pending", message: "Theme detection..." },
         ],
       },
       {
         category: "Backend API",
         icon: "⚡",
         tests: [
-          { name: "Health Check", status: "pending", message: "GET /api/health" },
+          { name: "Health Endpoint", status: "pending", message: "GET /api/health" },
           { name: "Hello Endpoint", status: "pending", message: "GET /api/hello" },
-          { name: "CORS Headers", status: "pending", message: "Verifying CORS configuration..." },
-          { name: "Response Time", status: "pending", message: "Measuring API latency..." },
+          { name: "CORS Headers", status: "pending", message: "Cross-origin policy..." },
+          { name: "Latency (3x avg)", status: "pending", message: "Measuring round-trips..." },
         ],
       },
       {
-        category: "Cloudflare Infrastructure",
+        category: "Cloudflare Infra",
         icon: "☁️",
         tests: [
-          { name: "Pages CDN", status: "pending", message: "Verifying CDN edge caching..." },
-          { name: "Worker Route", status: "pending", message: "Checking Worker routing..." },
-          { name: "KV Namespace", status: "pending", message: "Testing KV read/write..." },
-          { name: "D1 Database", status: "pending", message: "Checking D1 binding..." },
+          { name: "Pages CDN Edge", status: "pending", message: "Verifying CF-Ray..." },
+          { name: "Worker Routing", status: "pending", message: "Edge routing check..." },
+          { name: "KV Read/Write", status: "pending", message: "KV namespace I/O..." },
+          { name: "D1 Binding", status: "pending", message: "Database binding..." },
         ],
       },
       {
         category: "Security",
         icon: "🔒",
         tests: [
-          { name: "HTTPS", status: "pending", message: "Verifying SSL/TLS..." },
-          { name: "Security Headers", status: "pending", message: "Checking security headers..." },
-          { name: "No Server Info Leak", status: "pending", message: "Checking for info disclosure..." },
+          { name: "HTTPS Enforcement", status: "pending", message: "SSL/TLS check..." },
+          { name: "Security Headers", status: "pending", message: "Header analysis..." },
+          { name: "Info Disclosure", status: "pending", message: "Server fingerprint..." },
         ],
       },
       {
         category: "CI/CD Pipeline",
         icon: "🔄",
         tests: [
-          { name: "GitHub Actions", status: "pending", message: "Checking workflow status..." },
-          { name: "Auto Deploy", status: "pending", message: "Verifying auto-deployment..." },
-          { name: "Build Artifacts", status: "pending", message: "Checking build output..." },
+          { name: "GitHub Actions", status: "pending", message: "Workflow status..." },
+          { name: "Auto-Deploy Config", status: "pending", message: "Deploy workflow..." },
+          { name: "Build Artifacts", status: "pending", message: "Build verification..." },
         ],
       },
     ];
+    setSuites(initial);
 
-    setSuites(initialSuites);
+    await new Promise((r) => setTimeout(r, 400));
 
-    // Helper to update a specific test
-    const updateTest = (
-      suiteIdx: number,
-      testIdx: number,
-      update: Partial<TestResult>
-    ) => {
-      setSuites((prev) => {
-        const next = JSON.parse(JSON.stringify(prev)) as TestSuite[];
-        next[suiteIdx].tests[testIdx] = { ...next[suiteIdx].tests[testIdx], ...update };
-        return next;
-      });
-    };
-
-    // ============ FRONTEND TESTS ============
-    // Test 1: Page Load
-    updateTest(0, 0, { status: "running", message: "Loading page..." });
-    const pageStart = Date.now();
+    // ===== FRONTEND =====
+    updateTest(0, 0, { status: "running" });
+    const t0 = Date.now();
     try {
       const res = await fetch(FRONTEND_URL, { signal: AbortSignal.timeout(10000) });
-      const pageTime = Date.now() - pageStart;
-      if (res.ok) {
-        updateTest(0, 0, {
-          status: "pass",
-          message: `Page loaded successfully (${res.status})`,
-          duration: pageTime,
-        });
-      } else {
-        updateTest(0, 0, {
-          status: "fail",
-          message: `Page returned ${res.status}`,
-          duration: pageTime,
-        });
-      }
+      updateTest(0, 0, { status: res.ok ? "pass" : "fail", message: `Status ${res.status}`, duration: Date.now() - t0 });
     } catch (e: any) {
-      updateTest(0, 0, { status: "fail", message: `Failed to load: ${e.message}` });
+      updateTest(0, 0, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 2: Static Assets
-    updateTest(0, 1, { status: "running", message: "Checking static assets..." });
+    updateTest(0, 1, { status: "running" });
     try {
       const html = await (await fetch(FRONTEND_URL, { signal: AbortSignal.timeout(10000) })).text();
-      const hasAssets = html.includes("_next") || html.includes("static");
-      updateTest(0, 1, {
-        status: hasAssets ? "pass" : "warn",
-        message: hasAssets ? "Static assets found in HTML" : "No static asset references found",
-        details: hasAssets ? html.substring(0, 200) : undefined,
-      });
+      const ok = html.includes("_next") || html.includes("static");
+      updateTest(0, 1, { status: ok ? "pass" : "warn", message: ok ? "Assets detected" : "No asset refs found", details: html.slice(0, 300) });
     } catch (e: any) {
       updateTest(0, 1, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 3: Responsive Meta
-    updateTest(0, 2, { status: "running", message: "Checking meta tags..." });
+    updateTest(0, 2, { status: "running" });
     try {
       const html = await (await fetch(FRONTEND_URL, { signal: AbortSignal.timeout(10000) })).text();
-      const hasViewport = html.includes('name="viewport"');
-      updateTest(0, 2, {
-        status: hasViewport ? "pass" : "fail",
-        message: hasViewport ? "Viewport meta tag present" : "Missing viewport meta tag",
-      });
+      const ok = html.includes('name="viewport"');
+      updateTest(0, 2, { status: ok ? "pass" : "fail", message: ok ? "Viewport meta present" : "Missing viewport meta" });
     } catch (e: any) {
       updateTest(0, 2, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 4: Dark Mode
-    updateTest(0, 3, { status: "running", message: "Checking dark mode support..." });
+    updateTest(0, 3, { status: "running" });
     try {
       const html = await (await fetch(FRONTEND_URL, { signal: AbortSignal.timeout(10000) })).text();
-      const hasDarkMode =
-        html.includes("prefers-color-scheme") || html.includes("dark:") || html.includes('class="dark"');
-      updateTest(0, 3, {
-        status: hasDarkMode ? "pass" : "warn",
-        message: hasDarkMode ? "Dark mode CSS detected" : "No dark mode support found",
-      });
+      const ok = html.includes("prefers-color-scheme") || html.includes("dark:");
+      updateTest(0, 3, { status: ok ? "pass" : "warn", message: ok ? "Dark mode CSS found" : "No dark mode support" });
     } catch (e: any) {
       updateTest(0, 3, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // ============ BACKEND TESTS ============
-    // Test 1: Health Check
-    updateTest(1, 0, { status: "running", message: "Pinging /api/health..." });
-    const healthStart = Date.now();
+    // ===== BACKEND =====
+    updateTest(1, 0, { status: "running" });
+    const t1 = Date.now();
     try {
-      const res = await fetch(`${BACKEND_URL}/api/health`, {
-        signal: AbortSignal.timeout(10000),
-      });
-      const healthTime = Date.now() - healthStart;
+      const res = await fetch(`${BACKEND_URL}/api/health`, { signal: AbortSignal.timeout(10000) });
       const data = await res.json();
-      if (res.ok && data.status === "ok") {
-        updateTest(1, 0, {
-          status: "pass",
-          message: `Backend healthy: ${data.message}`,
-          duration: healthTime,
-          details: JSON.stringify(data, null, 2),
-        });
-      } else {
-        updateTest(1, 0, {
-          status: "fail",
-          message: `Unexpected response: ${JSON.stringify(data)}`,
-          duration: healthTime,
-        });
-      }
+      const ok = res.ok && data.status === "ok";
+      updateTest(1, 0, { status: ok ? "pass" : "fail", message: ok ? "Backend healthy" : "Unexpected response", duration: Date.now() - t1, details: JSON.stringify(data, null, 2) });
     } catch (e: any) {
-      updateTest(1, 0, { status: "fail", message: `Backend unreachable: ${e.message}` });
+      updateTest(1, 0, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 2: Hello Endpoint
-    updateTest(1, 1, { status: "running", message: "Testing /api/hello..." });
+    updateTest(1, 1, { status: "running" });
     try {
-      const res = await fetch(`${BACKEND_URL}/api/hello`, {
-        signal: AbortSignal.timeout(10000),
-      });
+      const res = await fetch(`${BACKEND_URL}/api/hello`, { signal: AbortSignal.timeout(10000) });
       const data = await res.json();
-      updateTest(1, 1, {
-        status: res.ok ? "pass" : "fail",
-        message: res.ok ? data.message || "Hello endpoint working" : `Failed: ${res.status}`,
-        details: JSON.stringify(data, null, 2),
-      });
+      updateTest(1, 1, { status: res.ok ? "pass" : "fail", message: data.message || "Working", details: JSON.stringify(data, null, 2) });
     } catch (e: any) {
       updateTest(1, 1, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 3: CORS Headers
-    updateTest(1, 2, { status: "running", message: "Checking CORS headers..." });
+    updateTest(1, 2, { status: "running" });
     try {
-      const res = await fetch(`${BACKEND_URL}/api/health`, {
-        method: "OPTIONS",
-        signal: AbortSignal.timeout(10000),
-      });
-      const corsHeader = res.headers.get("access-control-allow-origin");
-      updateTest(1, 2, {
-        status: corsHeader ? "pass" : "warn",
-        message: corsHeader
-          ? `CORS enabled: ${corsHeader}`
-          : "No CORS header (may be restricted to same-origin)",
-        details: `Status: ${res.status}\nHeaders: ${JSON.stringify(Object.fromEntries(res.headers), null, 2)}`,
-      });
+      const res = await fetch(`${BACKEND_URL}/api/health`, { method: "OPTIONS", signal: AbortSignal.timeout(10000) });
+      const cors = res.headers.get("access-control-allow-origin");
+      const allHeaders = JSON.stringify(Object.fromEntries(res.headers), null, 2);
+      updateTest(1, 2, { status: cors ? "pass" : "warn", message: cors ? `CORS: ${cors}` : "No CORS header", details: allHeaders });
     } catch (e: any) {
-      updateTest(1, 2, { status: "warn", message: `CORS check inconclusive: ${e.message}` });
+      updateTest(1, 2, { status: "warn", message: "CORS check inconclusive" });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 4: Response Time
-    updateTest(1, 3, { status: "running", message: "Measuring latency..." });
-    const latencies: number[] = [];
+    updateTest(1, 3, { status: "running" });
+    const lats: number[] = [];
     for (let i = 0; i < 3; i++) {
-      const start = Date.now();
+      const s = Date.now();
       try {
         await fetch(`${BACKEND_URL}/api/health`, { signal: AbortSignal.timeout(5000) });
-        latencies.push(Date.now() - start);
-      } catch {
-        latencies.push(-1);
-      }
+        lats.push(Date.now() - s);
+      } catch { lats.push(-1); }
     }
-    const validLatencies = latencies.filter((l) => l > 0);
-    if (validLatencies.length > 0) {
-      const avg = Math.round(validLatencies.reduce((a, b) => a + b, 0) / validLatencies.length);
-      const max = Math.max(...validLatencies);
-      updateTest(1, 3, {
-        status: avg < 500 ? "pass" : avg < 1000 ? "warn" : "fail",
-        message: `Avg: ${avg}ms | Max: ${max}ms (${validLatencies.length}/3 successful)`,
-        details: `Individual: ${latencies.map((l) => (l > 0 ? `${l}ms` : "timeout")).join(", ")}`,
-      });
+    const valid = lats.filter((l) => l > 0);
+    if (valid.length > 0) {
+      const avg = Math.round(valid.reduce((a, b) => a + b, 0) / valid.length);
+      const max = Math.max(...valid);
+      updateTest(1, 3, { status: avg < 500 ? "pass" : avg < 1000 ? "warn" : "fail", message: `Avg ${avg}ms · Max ${max}ms (${valid.length}/3)`, details: lats.map((l) => (l > 0 ? `${l}ms` : "timeout")).join(" · ") });
     } else {
       updateTest(1, 3, { status: "fail", message: "All requests timed out" });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // ============ CLOUDFLARE INFRASTRUCTURE ============
-    // Test 1: Pages CDN
-    updateTest(2, 0, { status: "running", message: "Checking CDN headers..." });
+    // ===== CLOUDFLARE INFRA =====
+    updateTest(2, 0, { status: "running" });
     try {
       const res = await fetch(FRONTEND_URL, { signal: AbortSignal.timeout(10000) });
-      const cfCache = res.headers.get("cf-cache-status");
       const cfRay = res.headers.get("cf-ray");
-      const server = res.headers.get("server");
-      updateTest(2, 0, {
-        status: cfRay ? "pass" : "warn",
-        message: cfRay
-          ? `Served by Cloudflare edge (${cfRay.split("-")[1] || "unknown"})`
-          : "No CF-Ray header (may be direct origin)",
-        details: `CF-Cache: ${cfCache || "N/A"}\nCF-Ray: ${cfRay || "N/A"}\nServer: ${server || "N/A"}`,
-      });
+      const cfCache = res.headers.get("cf-cache-status");
+      updateTest(2, 0, { status: cfRay ? "pass" : "warn", message: cfRay ? `Edge: ${cfRay.split("-")[1]?.toUpperCase() || "HIT"}` : "No CF-Ray", details: `CF-Ray: ${cfRay || "N/A"}\nCF-Cache: ${cfCache || "N/A"}` });
     } catch (e: any) {
       updateTest(2, 0, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 2: Worker Route
-    updateTest(2, 1, { status: "running", message: "Checking Worker routing..." });
+    updateTest(2, 1, { status: "running" });
     try {
       const res = await fetch(BACKEND_URL, { signal: AbortSignal.timeout(10000) });
       const cfRay = res.headers.get("cf-ray");
-      updateTest(2, 1, {
-        status: res.ok && cfRay ? "pass" : "warn",
-        message: res.ok && cfRay ? "Worker responding via Cloudflare edge" : "Worker response unusual",
-        details: `Status: ${res.status}\nCF-Ray: ${cfRay || "N/A"}`,
-      });
+      updateTest(2, 1, { status: res.ok && cfRay ? "pass" : "warn", message: cfRay ? "Worker via edge" : "Unusual response", details: `Status: ${res.status}\nCF-Ray: ${cfRay || "N/A"}` });
     } catch (e: any) {
       updateTest(2, 1, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 3: KV Read/Write
-    updateTest(2, 2, { status: "running", message: "Testing KV namespace..." });
+    updateTest(2, 2, { status: "running" });
     try {
-      const testKey = `test-${Date.now()}`;
-      const testValue = { test: true, timestamp: Date.now() };
-
-      // Write
-      const writeRes = await fetch(`${BACKEND_URL}/api/kv/${testKey}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(testValue),
-        signal: AbortSignal.timeout(10000),
-      });
-      const writeData = await writeRes.json();
-
-      // Read
-      const readRes = await fetch(`${BACKEND_URL}/api/kv/${testKey}`, {
-        signal: AbortSignal.timeout(10000),
-      });
-      const readData = await readRes.json();
-
-      updateTest(2, 2, {
-        status: writeRes.ok && readRes.ok ? "pass" : "fail",
-        message: writeRes.ok && readRes.ok ? "KV read/write successful" : "KV operation failed",
-        details: `Write: ${JSON.stringify(writeData)}\nRead: ${JSON.stringify(readData)}`,
-      });
+      const key = `test-${Date.now()}`;
+      const val = { test: true, ts: Date.now() };
+      const wRes = await fetch(`${BACKEND_URL}/api/kv/${key}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(val), signal: AbortSignal.timeout(10000) });
+      const rRes = await fetch(`${BACKEND_URL}/api/kv/${key}`, { signal: AbortSignal.timeout(10000) });
+      const wData = await wRes.json();
+      const rData = await rRes.json();
+      updateTest(2, 2, { status: wRes.ok && rRes.ok ? "pass" : "fail", message: wRes.ok && rRes.ok ? "KV I/O successful" : "KV failed", details: `Write: ${JSON.stringify(wData)}\nRead: ${JSON.stringify(rData)}` });
     } catch (e: any) {
-      updateTest(2, 2, { status: "fail", message: `KV test failed: ${e.message}` });
+      updateTest(2, 2, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 4: D1 Database
-    updateTest(2, 3, { status: "running", message: "Checking D1 binding..." });
+    updateTest(2, 3, { status: "running" });
     try {
-      const res = await fetch(`${BACKEND_URL}/api/health`, {
-        signal: AbortSignal.timeout(10000),
-      });
-      // D1 is bound but we don't have specific D1 endpoints yet
-      // Just verify the Worker is running (which means bindings loaded)
-      updateTest(2, 3, {
-        status: res.ok ? "pass" : "fail",
-        message: res.ok
-          ? "Worker loaded successfully (D1 binding configured)"
-          : "Worker may not have loaded bindings",
-        details: "D1 database 'staging-starter-db' is bound. Add D1 query endpoints to test fully.",
-      });
+      const res = await fetch(`${BACKEND_URL}/api/health`, { signal: AbortSignal.timeout(10000) });
+      updateTest(2, 3, { status: res.ok ? "pass" : "fail", message: res.ok ? "Worker loaded (D1 bound)" : "Worker issue", details: "D1 database 'staging-starter-db' is bound. Add query endpoints for full test." });
     } catch (e: any) {
       updateTest(2, 3, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // ============ SECURITY TESTS ============
-    // Test 1: HTTPS
-    updateTest(3, 0, { status: "running", message: "Verifying HTTPS..." });
-    const isHttps = FRONTEND_URL.startsWith("https") && BACKEND_URL.startsWith("https");
-    updateTest(3, 0, {
-      status: isHttps ? "pass" : "fail",
-      message: isHttps ? "Both frontend and backend use HTTPS" : "HTTPS not enforced",
-    });
+    // ===== SECURITY =====
+    updateTest(3, 0, { status: "running" });
+    const httpsOk = FRONTEND_URL.startsWith("https") && BACKEND_URL.startsWith("https");
+    updateTest(3, 0, { status: httpsOk ? "pass" : "fail", message: httpsOk ? "HTTPS enforced" : "HTTPS not enforced" });
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 2: Security Headers
-    updateTest(3, 1, { status: "running", message: "Checking security headers..." });
+    updateTest(3, 1, { status: "running" });
     try {
       const res = await fetch(FRONTEND_URL, { signal: AbortSignal.timeout(10000) });
-      const headers = res.headers;
-      const securityHeaders = {
-        "x-content-type-options": headers.get("x-content-type-options"),
-        "x-frame-options": headers.get("x-frame-options"),
-        "x-xss-protection": headers.get("x-xss-protection"),
-        "strict-transport-security": headers.get("strict-transport-security"),
-        "content-security-policy": headers.get("content-security-policy"),
-        "referrer-policy": headers.get("referrer-policy"),
+      const h = res.headers;
+      const sh: Record<string, string | null> = {
+        "X-Content-Type-Options": h.get("x-content-type-options"),
+        "X-Frame-Options": h.get("x-frame-options"),
+        "X-XSS-Protection": h.get("x-xss-protection"),
+        "Strict-Transport-Security": h.get("strict-transport-security"),
+        "Content-Security-Policy": h.get("content-security-policy"),
+        "Referrer-Policy": h.get("referrer-policy"),
       };
-      const present = Object.values(securityHeaders).filter(Boolean).length;
-      updateTest(3, 1, {
-        status: present >= 2 ? "pass" : present >= 1 ? "warn" : "fail",
-        message: `${present}/6 security headers present`,
-        details: JSON.stringify(securityHeaders, null, 2),
-      });
+      const present = Object.values(sh).filter(Boolean).length;
+      updateTest(3, 1, { status: present >= 2 ? "pass" : present >= 1 ? "warn" : "fail", message: `${present}/6 headers present`, details: JSON.stringify(sh, null, 2) });
     } catch (e: any) {
       updateTest(3, 1, { status: "fail", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 3: No Server Info Leak
-    updateTest(3, 2, { status: "running", message: "Checking for info disclosure..." });
+    updateTest(3, 2, { status: "running" });
     try {
       const res = await fetch(BACKEND_URL, { signal: AbortSignal.timeout(10000) });
-      const server = res.headers.get("server");
-      const powered = res.headers.get("x-powered-by");
-      const hasLeak = server === "nginx" || powered;
-      updateTest(3, 2, {
-        status: !hasLeak ? "pass" : "warn",
-        message: !hasLeak
-          ? "No server info leaked"
-          : `Server header: ${server}, X-Powered-By: ${powered}`,
-        details: `Server: ${server || "not set"}\nX-Powered-By: ${powered || "not set"}`,
-      });
+      const srv = res.headers.get("server");
+      const pwr = res.headers.get("x-powered-by");
+      const leak = srv === "nginx" || !!pwr;
+      updateTest(3, 2, { status: !leak ? "pass" : "warn", message: !leak ? "No info leaked" : `Leak: ${srv} / ${pwr}`, details: `Server: ${srv || "not set"}\nX-Powered-By: ${pwr || "not set"}` });
     } catch (e: any) {
       updateTest(3, 2, { status: "warn", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // ============ CI/CD TESTS ============
-    // Test 1: GitHub Actions
-    updateTest(4, 0, { status: "running", message: "Checking GitHub Actions..." });
+    // ===== CI/CD =====
+    updateTest(4, 0, { status: "running" });
     try {
-      const res = await fetch(
-        "https://api.github.com/repos/nhprince/staging-starter/actions/runs?per_page=1",
-        { signal: AbortSignal.timeout(10000) }
-      );
+      const res = await fetch("https://api.github.com/repos/nhprince/staging-starter/actions/runs?per_page=1", { signal: AbortSignal.timeout(10000) });
       const data = await res.json();
-      const latestRun = data.workflow_runs?.[0];
-      if (latestRun) {
-        updateTest(4, 0, {
-          status: latestRun.conclusion === "success" ? "pass" : "fail",
-          message: `Latest run: ${latestRun.conclusion} (${latestRun.event})`,
-          details: `Run #${latestRun.run_number}\nStatus: ${latestRun.status}\nConclusion: ${latestRun.conclusion}\nBranch: ${latestRun.head_branch}\nCommit: ${latestRun.head_sha?.substring(0, 7)}`,
-        });
+      const run = data.workflow_runs?.[0];
+      if (run) {
+        updateTest(4, 0, { status: run.conclusion === "success" ? "pass" : "fail", message: `${run.conclusion} (${run.event})`, details: `#${run.run_number} · ${run.status} · ${run.head_branch} · ${run.head_sha?.slice(0, 7)}` });
       } else {
-        updateTest(4, 0, { status: "warn", message: "No workflow runs found" });
+        updateTest(4, 0, { status: "warn", message: "No runs found" });
       }
     } catch (e: any) {
-      updateTest(4, 0, { status: "warn", message: `Could not check: ${e.message}` });
+      updateTest(4, 0, { status: "warn", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 2: Auto Deploy
-    updateTest(4, 1, { status: "running", message: "Verifying auto-deploy..." });
+    updateTest(4, 1, { status: "running" });
     try {
-      const res = await fetch(
-        "https://api.github.com/repos/nhprince/staging-starter/actions/workflows/deploy.yml",
-        { signal: AbortSignal.timeout(10000) }
-      );
+      const res = await fetch("https://api.github.com/repos/nhprince/staging-starter/actions/workflows/deploy.yml", { signal: AbortSignal.timeout(10000) });
       const data = await res.json();
-      updateTest(4, 1, {
-        status: data.state === "active" ? "pass" : "warn",
-        message: data.state === "active" ? "Deploy workflow is active" : `Workflow state: ${data.state}`,
-        details: `Workflow: ${data.name}\nState: ${data.state}\nID: ${data.id}`,
-      });
+      updateTest(4, 1, { status: data.state === "active" ? "pass" : "warn", message: data.state === "active" ? "Workflow active" : `State: ${data.state}`, details: `ID: ${data.id}\nName: ${data.name}` });
     } catch (e: any) {
       updateTest(4, 1, { status: "warn", message: e.message });
     }
+    await new Promise((r) => setTimeout(r, 200));
 
-    // Test 3: Build Artifacts
-    updateTest(4, 2, { status: "running", message: "Checking build output..." });
+    updateTest(4, 2, { status: "running" });
     try {
       const res = await fetch(FRONTEND_URL, { signal: AbortSignal.timeout(10000) });
       const html = await res.text();
-      const hasBuild =
-        html.includes("__NEXT_DATA__") || html.includes("_next/") || html.includes("static/");
-      updateTest(4, 2, {
-        status: hasBuild ? "pass" : "warn",
-        message: hasBuild ? "Build artifacts detected (Next.js output)" : "Build output not verified",
-        details: `HTML length: ${html.length} chars\nHas Next.js markers: ${hasBuild}`,
-      });
+      const built = html.includes("__NEXT_DATA__") || html.includes("_next/") || html.includes("static/");
+      updateTest(4, 2, { status: built ? "pass" : "warn", message: built ? "Build artifacts found" : "No build markers", details: `HTML: ${html.length} chars · Next.js: ${built}` });
     } catch (e: any) {
       updateTest(4, 2, { status: "fail", message: e.message });
     }
 
-    setLastRun(new Date().toLocaleString());
+    setLastRun(new Date().toLocaleTimeString());
     setIsRunning(false);
   }, []);
 
-  // Auto-run on mount
   useEffect(() => {
     runTests();
   }, [runTests]);
 
-  const totalTests = suites.reduce((acc, s) => acc + s.tests.length, 0);
-  const passedTests = suites.reduce(
-    (acc, s) => acc + s.tests.filter((t) => t.status === "pass").length,
-    0
-  );
+  const totalTests = suites.reduce((a, s) => a + s.tests.length, 0);
+  const passedTests = suites.reduce((a, s) => a + s.tests.filter((t) => t.status === "pass").length, 0);
+  const failedTests = suites.reduce((a, s) => a + s.tests.filter((t) => t.status === "fail").length, 0);
+  const warnTests = suites.reduce((a, s) => a + s.tests.filter((t) => t.status === "warn").length, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold">🚀 System Status</h1>
-            <p className="text-sm text-gray-500">
-              {lastRun ? `Last checked: ${lastRun}` : "Click Run to start diagnostics"}
-            </p>
-          </div>
-          <button
-            onClick={runTests}
-            disabled={isRunning}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
-          >
-            {isRunning ? (
-              <>
-                <span className="animate-spin">🔄</span> Running...
-              </>
-            ) : (
-              <>▶ Run Tests</>
-            )}
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen relative">
+      {/* Background mesh */}
+      <div className="bg-mesh" />
 
-      <main className="max-w-5xl mx-auto px-6 py-8">
-        {/* Score */}
-        {suites.length > 0 && (
-          <div className="mb-8 p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold mb-1">Health Score</h2>
-              <p className="text-sm text-gray-500">
-                {suites.length} categories • {totalTests} tests
-              </p>
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Header */}
+        <header className="header-glow sticky top-0 z-20 backdrop-blur-xl bg-[rgba(10,10,15,0.8)] border-b border-[var(--border-subtle)]">
+          <div className="max-w-5xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[var(--gradient-main)] flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-indigo-500/20">
+                ✦
+              </div>
+              <div>
+                <h1 className="text-base md:text-lg font-bold tracking-tight">System Status</h1>
+                <p className="text-[11px] text-[var(--text-muted)]">
+                  {lastRun ? `Last run: ${lastRun}` : "Ready to diagnose"}
+                </p>
+              </div>
             </div>
-            <ScoreCircle score={passedTests} total={totalTests} />
+            <button
+              onClick={runTests}
+              disabled={isRunning}
+              className="btn-primary text-xs md:text-sm"
+            >
+              {isRunning ? (
+                <>
+                  <span className="spinner" />
+                  Running...
+                </>
+              ) : (
+                <>▶ Run Tests</>
+              )}
+            </button>
           </div>
-        )}
+        </header>
 
-        {/* Test Suites */}
-        {suites.map((suite, i) => (
-          <SuiteSection key={i} suite={suite} />
-        ))}
+        <main className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-8">
+          {/* Score Card */}
+          {suites.length > 0 && (
+            <div className="glass-card p-5 md:p-6 mb-6 md:mb-8 stagger-item glow-indigo">
+              <div className="flex flex-col md:flex-row items-center gap-6">
+                <ScoreRing score={passedTests} total={totalTests} />
+                <div className="flex-1 text-center md:text-left">
+                  <h2 className="text-xl md:text-2xl font-bold mb-2">Health Overview</h2>
+                  <p className="text-sm text-[var(--text-secondary)] mb-4">
+                    {suites.length} categories · {totalTests} tests · {isRunning ? "Running..." : "Complete"}
+                  </p>
+                  <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[rgba(52,211,153,0.08)] border border-[rgba(52,211,153,0.15)]">
+                      <span className="dot-pulse green" />
+                      <span className="text-xs font-semibold text-[var(--accent-green)]">{passedTests} Passed</span>
+                    </div>
+                    {failedTests > 0 && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[rgba(248,113,113,0.08)] border border-[rgba(248,113,113,0.15)]">
+                        <span className="dot-pulse red" />
+                        <span className="text-xs font-semibold text-[var(--accent-red)]">{failedTests} Failed</span>
+                      </div>
+                    )}
+                    {warnTests > 0 && (
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[rgba(251,191,36,0.08)] border border-[rgba(251,191,36,0.15)]">
+                        <span className="dot-pulse yellow" />
+                        <span className="text-xs font-semibold text-[var(--accent-yellow)]">{warnTests} Warnings</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
-        {/* Footer */}
-        <div className="mt-12 pt-6 border-t border-gray-200 dark:border-gray-800 text-center text-sm text-gray-400">
-          <p>
-            Built by <span className="font-semibold">Prince</span> • Powered by{" "}
-            <span className="font-semibold">Saturday</span> •{" "}
-            <span className="font-semibold">Cloudflare Pages + Workers</span>
-          </p>
-          <p className="mt-1">
-            Frontend: <a href={FRONTEND_URL} className="text-blue-500 hover:underline" target="_blank" rel="noreferrer">{FRONTEND_URL}</a>
-            <br />
-            Backend: <a href={BACKEND_URL} className="text-blue-500 hover:underline" target="_blank" rel="noreferrer">{BACKEND_URL}</a>
-          </p>
-        </div>
-      </main>
+          {/* Test Suites */}
+          <div className="flex flex-col gap-5 md:gap-6">
+            {suites.map((suite, i) => (
+              <SuiteSection key={i} suite={suite} index={i} />
+            ))}
+          </div>
+
+          {/* Footer */}
+          <footer className="mt-10 pt-6 border-t border-[var(--border-subtle)] text-center">
+            <p className="text-xs text-[var(--text-muted)]">
+              Built by <span className="font-semibold text-[var(--text-secondary)]">Prince</span> · Powered by{" "}
+              <span className="font-semibold text-[var(--text-secondary)]">Saturday</span> ·{" "}
+              <span className="font-semibold text-[var(--accent-indigo)]">Cloudflare Pages + Workers</span>
+            </p>
+            <div className="mt-2 flex flex-wrap justify-center gap-3 text-[10px] text-[var(--text-muted)]">
+              <a href={FRONTEND_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--accent-indigo)] transition-colors">
+                Frontend ↗
+              </a>
+              <span>·</span>
+              <a href={BACKEND_URL} target="_blank" rel="noreferrer" className="hover:text-[var(--accent-indigo)] transition-colors">
+                Backend ↗
+              </a>
+              <span>·</span>
+              <a href="https://github.com/nhprince/staging-starter" target="_blank" rel="noreferrer" className="hover:text-[var(--accent-indigo)] transition-colors">
+                Source ↗
+              </a>
+            </div>
+          </footer>
+        </main>
+      </div>
     </div>
   );
 }
