@@ -6,9 +6,9 @@ compatibility_flags = ["nodejs_compat"]
 
 [[kv_namespaces]]
 binding = "KV"
-id = "REPLACE_WITH_YOUR_KV_ID"
+id = "7b004b371012438ebe4500ef6a4e2361"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "staging-starter-db"
-database_id = "REPLACE_WITH_YOUR_D1_ID"
+database_id = "1c83b423-7b72-4ebe-a321-53a8ecc667ee"
