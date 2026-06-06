@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 /* ===== TYPES ===== */
 interface Project {
@@ -66,7 +66,7 @@ function ScoreRing({ score, total, size = 140 }: { score: number; total: number;
 }
 
 /* ===== PROJECT CARD ===== */
-function ProjectCard({ project, onRunTests }: { project: Project; onRunTests: (p: Project) => void }) {
+function ProjectCard({ project, index, onRunTests }: { project: Project; index: number; onRunTests: (p: Project) => void }) {
   const statusColors: Record<string, string> = {
     healthy: "var(--accent-green)",
     warning: "var(--accent-yellow)",
