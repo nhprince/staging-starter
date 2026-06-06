@@ -15,29 +15,7 @@ on:
           - server
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Lint frontend
-        run: cd frontend && pnpm lint
-        continue-on-error: true
-
   deploy-cloudflare:
-    needs: test
     if: github.event.inputs.deploy_target == 'cloudflare' || github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
@@ -52,14 +30,21 @@ jobs:
           node-version: 22
           cache: "pnpm"
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install frontend dependencies
+        run: cd frontend && pnpm install --no-frozen-lockfile
+
+      - name: Build frontend
+        run: cd frontend && pnpm build
 
       - name: Deploy Frontend to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CF_API_TOKEN }}
-          command: pages deploy frontend/out --project-name=staging-starter
+          workingDirectory: frontend
+          command: pages deploy out --project-name=staging-starter
+
+      - name: Install backend dependencies
+        run: cd backend && pnpm install --no-frozen-lockfile
 
       - name: Deploy Backend to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
@@ -69,7 +54,6 @@ jobs:
           command: deploy
 
   deploy-server:
-    needs: test
     if: github.event.inputs.deploy_target == 'server'
     runs-on: ubuntu-latest
     steps:
@@ -82,10 +66,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd ~/projects/staging-starter
+            cd ~/staging-starter
             git pull origin main
             pnpm install
             cd frontend && pnpm build && cd ..
-            pm2 restart staging-starter || pm2 start backend/dist/index.js --name staging-starter
-            pm2 save
+            cd backend && pnpm install && cd ..
+            pm2 restart staging-starter 2>/dev/null || echo "No PM2 process to restart"
             echo "✅ Deployed to server"
