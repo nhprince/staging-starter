@@ -47,11 +47,13 @@ Both get the same experience: **one command, fully deployed**.
 | Frontend blueprints | ❌ 3/4 empty | Astro, SvelteKit, static-html |
 | Auth modules | ❌ All empty | Clerk, AuthJS, Lucia |
 | Landing page scaffold | ✅ Complete | Full frontend + backend + schema |
-| CLI tool | ✅ Complete | 12 commands, --yes, --json, --verbose |
-| Local dev env | 🔄 In Progress | `saturday dev` command implemented |
-| Project config | ❌ Scattered | No single source of truth |
-| Interactive onboarding | ❌ None | High friction for new users |
-| Error handling | ❌ Fragile | Silent failures |
+| CLI tool | ✅ Complete | 14 commands, --yes, --json, --verbose |
+| Local dev env | ✅ Complete | docker-compose + saturday dev |
+| Project config | ✅ Complete | saturday.yaml + saturday config |
+| Interactive onboarding | ✅ Complete | saturday init wizard |
+| Error handling | ✅ Complete | saturday doctor + saturday verify |
+| Auth modules | ✅ Complete | Clerk integration (frontend + backend) |
+| Feature modules | ✅ Complete | Email module (Resend) |
 | Dashboard v2 | ❌ Demo only | Not a management tool |
 
 ---
