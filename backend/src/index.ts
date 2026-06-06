@@ -20,7 +20,7 @@ app.use("*", cors({
 // Root — Worker routing check
 app.get("/", (c) => {
   return c.json({
-    service: "staging-starter",
+    service: "saturday",
     status: "running",
     version: "1.0.0",
     endpoints: ["/api/health", "/api/hello", "/api/kv/:key"],

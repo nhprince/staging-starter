@@ -1,7 +1,9 @@
-# Skills Directory — Framework Skills
+# Skills Directory — Saturday Framework Skills
 
-This directory contains all skills for the Staging Starter framework.
+This directory contains all skills for the **Saturday** framework.
 Skills are organized by category and can be used by Saturday to build projects.
+
+> **Companion Guide:** For setting up the AI agent (Saturday) on a VPS, see the [AI VPS Setup Guide](https://github.com/nhprince/server-setup-guide).
 
 ## Structure
 

@@ -5,10 +5,10 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Project Dashboard | Staging Starter",
+  title: "Project Dashboard | Saturday",
   description: "Build, deploy, and manage web projects — 100% free infrastructure. Agent-driven development with Saturday.",
   openGraph: {
-    title: "Staging Starter — Project Dashboard",
+    title: "Saturday — Project Dashboard",
     description: "Build any web project. 100% free infrastructure. Agent-driven.",
     type: "website",
   },

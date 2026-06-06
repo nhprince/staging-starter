@@ -27,12 +27,12 @@ interface TestResult {
 const SAMPLE_PROJECTS: Project[] = [
   {
     id: "1",
-    name: "staging-starter",
+    name: "saturday",
     type: "Framework",
     status: "healthy",
-    frontendUrl: "https://staging-starter.pages.dev",
-    backendUrl: "https://staging-starter.nurulhudaprince18.workers.dev",
-    githubUrl: "https://github.com/nhprince/staging-starter",
+    frontendUrl: "https://saturday.pages.dev",
+    backendUrl: "https://saturday.nurulhudaprince18.workers.dev",
+    githubUrl: "https://github.com/nhprince/saturday",
     lastDeploy: "2 hours ago",
     testsPassed: 19,
     testsTotal: 19,
@@ -175,10 +175,10 @@ function TestModal({ project, onClose }: { project: Project; onClose: () => void
         ) : (
           <div className="flex flex-col gap-2">
             {tests.map((test, i) => (
-              <div key={i} className={`test-card status-${test.status}`}>
+              <div key={i} className={`test-card status-${test.status}` }>
                 <div className="flex items-center justify-between">
                   <span className="font-medium text-sm">{test.name}</span>
-                  <span className={`status-badge status-${test.status}`}>
+                  <span className={`status-badge status-${test.status}` }>
                     {test.status === "pass" ? "✓" : test.status === "fail" ? "✕" : test.status === "warn" ? "⚠" : "●"}
                     {" "}{test.status}
                   </span>
@@ -291,7 +291,7 @@ export default function Home() {
           <p className="text-xs text-[var(--text-muted)]">
             Built by <span className="font-semibold text-[var(--text-secondary)]">Prince</span> · Powered by{" "}
             <span className="font-semibold text-[var(--text-secondary)]">Saturday</span> ·{" "}
-            <span className="font-semibold text-[var(--accent-indigo)]">Staging Starter Framework</span>
+            <span className="font-semibold text-[var(--accent-indigo)]">Saturday Framework</span>
           </p>
         </footer>
       </div>

@@ -42,7 +42,7 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           workingDirectory: frontend
-          command: pages deploy out --project-name=staging-starter
+          command: pages deploy out --project-name=saturday
 
       - name: Install backend dependencies
         run: cd backend && pnpm install --no-frozen-lockfile
@@ -68,10 +68,10 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd ~/staging-starter
+            cd ~/saturday
             git pull origin main
             pnpm install
             cd frontend && pnpm build && cd ..
             cd backend && pnpm install && cd ..
-            pm2 restart staging-starter 2>/dev/null || echo "No PM2 process to restart"
+            pm2 restart saturday 2>/dev/null || echo "No PM2 process to restart"
             echo "✅ Deployed to server"

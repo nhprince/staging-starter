@@ -1,4 +1,4 @@
-# 🏗️ Staging Starter Framework
+# 🏗️ Saturday Framework
 
 > **Build any web project. 100% free infrastructure. Agent-driven.**
 
@@ -19,7 +19,7 @@ Saturday handles everything: scaffold → configure → deploy → verify.
 ## Framework Structure
 
 ```
-staging-starter/
+saturday/
 ├── scaffolds/           # Complete project blueprints
 │   ├── blog/           # MDX blog with admin, RSS, SEO
 │   ├── saas/           # SaaS with auth, billing, dashboard
@@ -131,6 +131,15 @@ Saturday uses skills from `skills/` directory to build projects. Each skill cont
 - Common pitfalls
 - Verification checklist
 - Agent tips
+
+## Connecting with the AI VPS Setup Guide
+
+Saturday is the official framework companion to the **[100% Free AI Agent Driven Development Workflow](https://github.com/nhprince/server-setup-guide)** guide:
+
+- The guide sets up your AI agent (Saturday) on a free VPS
+- Saturday then builds projects using 100% free infrastructure
+- The guide includes Saturday-specific commands and workflows
+- Both are maintained by Saturday (Hermes Agent) and auto-updated weekly
 
 ## Contributing
 

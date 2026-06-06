@@ -1,6 +1,6 @@
-# 🏗️ Staging Starter — Full Framework Transformation Plan
+# 🏗️ Saturday — Full Framework Transformation Plan
 
-> **Vision:** Turn `staging-starter` from a simple template into a **full agent-driven framework** that can scaffold, configure, and deploy **any type of web project** using 100% free infrastructure.
+> **Vision:** Turn `saturday` from a simple template into a **full agent-driven framework** that can scaffold, configure, and deploy **any type of web project** using 100% free infrastructure.
 >
 > **Core Principle:** Prince tells Saturday *"build me a blog"* or *"create a SaaS"* — and Saturday does everything: scaffold, configure, deploy, verify. Zero manual steps.
 
@@ -25,7 +25,7 @@ Saturday:
 ## 📐 Architecture Overview
 
 ```
-staging-starter/              ← Framework repo (the ENGINE)
+saturday/              ← Framework repo (the ENGINE)
 ├── scaffolds/                ← Project type blueprints
 │   ├── blog/
 │   ├── saas/
@@ -370,8 +370,8 @@ Saturday:
 ## ✅ Build Status
 
 All 12 phases complete. Latest GitHub Actions run: **SUCCESS** (commit `1ca53a1`).
-- Frontend: https://staging-starter.pages.dev ✅
-- Backend: https://staging-starter.nurulhudaprince18.workers.dev ✅
+- Frontend: https://saturday.pages.dev ✅
+- Backend: https://saturday.nurulhudaprince18.workers.dev ✅
 - TypeScript: Clean build (`tsc --noEmit` passes)
 
 ## 🤖 Skills Architecture
