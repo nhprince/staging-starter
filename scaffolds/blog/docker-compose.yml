@@ -1,0 +1,39 @@
+# Saturday Framework — Local Development Environment
+# Usage: docker-compose up
+
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8787
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8787:8787"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - d1-data:/app/.wrangler/state
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+
+volumes:
+  d1-data:
+    driver: local

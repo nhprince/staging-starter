@@ -46,9 +46,9 @@ Both get the same experience: **one command, fully deployed**.
 | E-commerce scaffold | ❌ README-only | Complex, Stripe integration |
 | Frontend blueprints | ❌ 3/4 empty | Astro, SvelteKit, static-html |
 | Auth modules | ❌ All empty | Clerk, AuthJS, Lucia |
-| Feature modules | ❌ All empty | CMS, comments, payments, email |
-| CLI tool | ❌ Python script | Needs proper CLI |
-| Local dev env | ❌ None | Can't test before deploy |
+| Landing page scaffold | ✅ Complete | Full frontend + backend + schema |
+| CLI tool | ✅ Complete | 12 commands, --yes, --json, --verbose |
+| Local dev env | 🔄 In Progress | `saturday dev` command implemented |
 | Project config | ❌ Scattered | No single source of truth |
 | Interactive onboarding | ❌ None | High friction for new users |
 | Error handling | ❌ Fragile | Silent failures |
