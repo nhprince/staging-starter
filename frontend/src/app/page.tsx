@@ -411,9 +411,10 @@ export default function Home() {
 
     updateTest(2, 1, { status: "running" });
     try {
-      const res = await fetch(BACKEND_URL, { signal: AbortSignal.timeout(10000) });
+      const res = await fetch(`${BACKEND_URL}/api/health`, { signal: AbortSignal.timeout(10000) });
       const cfRay = res.headers.get("cf-ray");
-      updateTest(2, 1, { status: res.ok && cfRay ? "pass" : "warn", message: cfRay ? "Worker via edge" : "Unusual response", details: `Status: ${res.status}\nCF-Ray: ${cfRay || "N/A"}` });
+      const cfPop = cfRay ? cfRay.split("-")[1]?.toUpperCase() || "EDGE" : "N/A";
+      updateTest(2, 1, { status: res.ok && cfRay ? "pass" : "warn", message: res.ok && cfRay ? `Worker via edge (${cfPop})` : "Edge header missing", details: `Status: ${res.status}\nCF-Ray: ${cfRay || "N/A"}\nCF-PoP: ${cfPop}` });
     } catch (e: any) {
       updateTest(2, 1, { status: "fail", message: e.message });
     }

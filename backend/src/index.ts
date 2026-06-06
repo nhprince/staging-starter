@@ -10,6 +10,17 @@ const app = new Hono<{ Bindings: Env }>();
 
 app.use("/api/*", cors());
 
+// Root — Worker routing check
+app.get("/", (c) => {
+  return c.json({
+    service: "staging-starter",
+    status: "running",
+    version: "1.0.0",
+    endpoints: ["/api/health", "/api/hello", "/api/kv/:key"],
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Health check
 app.get("/api/health", (c) => {
   return c.json({
