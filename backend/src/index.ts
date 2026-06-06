@@ -8,7 +8,14 @@ export interface Env {
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.use("/api/*", cors());
+// CORS — applied to all routes, exposes cf-ray for dashboard tests
+app.use("*", cors({
+  origin: "*",
+  allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowHeaders: ["Content-Type", "Authorization"],
+  exposeHeaders: ["cf-ray", "cf-cache-status", "cf-poop", "x-powered-by", "server"],
+  maxAge: 86400,
+}));
 
 // Root — Worker routing check
 app.get("/", (c) => {
