@@ -1,0 +1,15 @@
+{
+  "name": "saturday-blog",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd frontend && next dev",
+    "build": "cd frontend && next build",
+    "start": "cd frontend && next start",
+    "lint": "cd frontend && next lint",
+    "backend:dev": "cd backend && wrangler dev",
+    "backend:deploy": "cd backend && wrangler deploy",
+    "db:migrate": "cd backend && wrangler d1 migrations apply blog-db",
+    "seed": "cd backend && tsx seed.ts"
+  }
+}

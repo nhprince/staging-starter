@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+.env
+.env.local
+*.local
+.wrangler
+D1Database
+*.db
+*.sqlite
+*.sqlite3
+tests/e2e/node_modules
+tests/e2e/test-results
+tests/e2e/playwright-report

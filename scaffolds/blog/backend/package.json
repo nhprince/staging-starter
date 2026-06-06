@@ -1,0 +1,22 @@
+{
+  "name": "saturday-blog-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create blog-db",
+    "db:migrate": "wrangler d1 migrations apply blog-db",
+    "db:migrate:local": "wrangler d1 migrations apply blog-db --local",
+    "seed": "tsx seed.ts"
+  },
+  "dependencies": {
+    "hono": "^4.0.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240101.0",
+    "typescript": "^5.3.0",
+    "wrangler": "^4.0.0",
+    "tsx": "^4.0.0"
+  }
+}
