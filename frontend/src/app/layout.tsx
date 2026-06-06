@@ -1,11 +1,12 @@
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
-  title: "Staging Starter",
-  description: "Full-stack starter template by Prince",
+export const metadata: Metadata = {
+  title: "System Status | Staging Starter",
+  description: "Full-stack starter with dual deployment — Cloudflare + VPS",
 };
 
 export default function RootLayout({
