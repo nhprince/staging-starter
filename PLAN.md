@@ -352,20 +352,53 @@ Saturday:
 
 ## 📊 Progress Tracker
 
-| Phase | Name | Status | Target |
-|-------|------|--------|--------|
+| Phase | Name | Status | Skills Created |
+|-------|------|--------|----------------|
 | 1 | Framework Skeleton | ⬜ Not started | — |
-| 2 | Project Generator | ⬜ Not started | — |
-| 3 | Frontend Blueprints | ⬜ Not started | — |
-| 4 | Backend Blueprints | ⬜ Not started | — |
-| 5 | Database Adapters | ⬜ Not started | — |
-| 6 | Auth Modules | ⬜ Not started | — |
-| 7 | Pre-built Scaffolds | ⬜ Not started | — |
-| 8 | Feature Modules | ⬜ Not started | — |
-| 9 | Deployment System | ⬜ Not started | — |
+| 2 | Project Generator | ✅ Skills done | scaffold-project |
+| 3 | Frontend Blueprints | ✅ Skills done | astro-scaffold, sveltekit-scaffold |
+| 4 | Backend Blueprints | ✅ Skills done | configure-vps |
+| 5 | Database Adapters | ✅ Skills done | add-database |
+| 6 | Auth Modules | ✅ Skills done | add-auth |
+| 7 | Pre-built Scaffolds | ✅ Skills done | build-blog, build-saas, build-portfolio, build-api, build-ecommerce, build-landing |
+| 8 | Feature Modules | ✅ Skills done | stripe-payments, email-service, file-upload |
+| 9 | Deployment System | 🔄 Partial | configure-cloudflare |
 | 10 | Dashboard Panel | ⬜ Not started | — |
-| 11 | Skills | ⬜ Not started | — |
-| 12 | Documentation | ⬜ Not started | — |
+| 11 | Skills | ✅ Complete | All 17 skills created |
+| 12 | Documentation | 🔄 Partial | PLAN.md, skills/README.md |
+
+## 🤖 Skills Architecture
+
+All framework skills are installed in Saturday's skill store (`~/.hermes/skills/`) and documented in `skills/README.md`.
+
+### Skill Categories
+
+| Category | Skills | Purpose |
+|----------|--------|---------|
+| **Framework** | scaffold-project, configure-cloudflare, configure-vps | Infrastructure & scaffolding |
+| **Project Types** | build-blog, build-saas, build-portfolio, build-api, build-ecommerce, build-landing | Complete project blueprints |
+| **Frontends** | astro-scaffold, sveltekit-scaffold | Frontend framework setup |
+| **Features** | add-auth, add-database, stripe-payments, email-service, file-upload | Add capabilities |
+| **Testing** | playwright-e2e | Quality assurance |
+
+### How Saturday Uses Skills
+
+```
+Prince: "Build me a blog"
+  ↓
+Saturday reads: skills/project-types/build-blog.md
+  ↓
+Follows workflow:
+  1. scaffold-project (create repo, CF resources)
+  2. add-database (D1 schema)
+  3. add-auth (Clerk for admin)
+  4. Build frontend (Next.js + MDX)
+  5. Build backend (Hono API)
+  6. Deploy (git push → auto)
+  7. Verify (health checks)
+  ↓
+Returns: live URLs
+```
 
 ---
 
