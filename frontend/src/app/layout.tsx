@@ -5,8 +5,13 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "System Status | Staging Starter",
-  description: "Full-stack starter with dual deployment — Cloudflare + VPS",
+  title: "Project Dashboard | Staging Starter",
+  description: "Build, deploy, and manage web projects — 100% free infrastructure. Agent-driven development with Saturday.",
+  openGraph: {
+    title: "Staging Starter — Project Dashboard",
+    description: "Build any web project. 100% free infrastructure. Agent-driven.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
