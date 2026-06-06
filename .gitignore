@@ -6,3 +6,4 @@ out
 .DS_Store
 dist
 *.log
+backend/.wrangler/cache/
