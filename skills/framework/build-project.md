@@ -18,7 +18,7 @@ Extract from Prince's message:
 
 ### 2. Scaffold
 ```bash
-cd ~/staging-starter
+cd ~/saturday
 python3 scripts/new-project.py --type <TYPE> --name <NAME>
 ```
 

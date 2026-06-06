@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Staging Starter — Project Generator
+Saturday — Project Generator
 Creates a new project from framework blueprints.
 
 Usage:
@@ -18,7 +18,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 
-# Framework root (where this script lives)
+# Framework root (where this script lies)
 FRAMEWORK_ROOT = Path(__file__).parent.parent
 
 # Available options
@@ -52,10 +52,9 @@ EXTRA_DEFAULTS = {
 def print_banner():
     print("""
 ╔══════════════════════════════════════════════════════╗
-║  🏗️  Staging Starter — Project Generator            ║
+║  🏗️  Saturday — Project Generator                   ║
 ║  Build any web project. 100% free infrastructure.   ║
-╚══════════════════════════════════════════════════════╝
-""")
+╚══════════════════════════════════════════════════════╝""")
 
 
 def ask_choice(prompt, options, default=None):
@@ -194,7 +193,7 @@ def scaffold_project(project_type, name, frontend, backend, db, auth, extras, in
     # 8. Create project README
     readme_content = f"""# {name}
 
-{project_type.capitalize()} project built with Staging Starter Framework.
+{project_type.capitalize()} project built with Saturday Framework.
 
 ## Stack
 - **Frontend:** {frontend}
@@ -220,7 +219,7 @@ Push to `main` → auto-deploys to Cloudflare.
 
 ## Generated
 - Date: {datetime.now().strftime("%Y-%m-%d %H:%M")}
-- Framework: Staging Starter
+- Framework: Saturday
 """
     (project_dir / "README.md").write_text(readme_content)
 
@@ -297,7 +296,7 @@ def setup_cloudflare(name):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Staging Starter — Project Generator")
+    parser = argparse.ArgumentParser(description="Saturday — Project Generator")
     parser.add_argument("--type", choices=PROJECT_TYPES, help="Project type")
     parser.add_argument("--name", help="Project name (kebab-case)")
     parser.add_argument("--frontend", choices=FRONTENDS, help="Frontend framework")

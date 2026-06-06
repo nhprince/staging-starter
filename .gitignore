@@ -6,4 +6,8 @@ out
 .DS_Store
 dist
 *.log
-backend/.wrangler/cache/
+backend/.wrangler/
+frontend/out/
+frontend/.next/
+frontend/tsconfig.tsbuildinfo
+*.tsbuildinfo

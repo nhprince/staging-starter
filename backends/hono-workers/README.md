@@ -1,23 +1,23 @@
-# Hono Workers Backend Blueprint
+# Backend Template — Hono on Cloudflare Workers
 
-Hono framework on Cloudflare Workers with KV + D1 bindings.
+Copy this directory as a starting point for new project backends.
 
-## Usage
-```bash
-cp -r backends/hono-workers/* ~/projects/<name>/backend/
-```
-
-## What's Included
-- `src/index.ts` — Hono app with CORS, health check, KV routes
-- `schema.sql` — D1 schema template
-- `wrangler.toml` — KV + D1 bindings (fill in your IDs)
-- `package.json` — Hono + drizzle-orm + wrangler
-- `tsconfig.json` — TypeScript config
+## Setup
+1. Copy to your project: `cp -r backends/hono-workers ~/projects/my-project/backend/`
+2. Update `wrangler.toml` with your project name and resource IDs
+3. Update `package.json` name field
+4. Run `pnpm install`
 
 ## Features
-- CORS configured for all routes
-- Standardized error responses
-- KV read/write helpers
-- D1 query helpers
-- Health check endpoint
-- Ready for auth middleware
+- Hono framework (fast, lightweight)
+- CORS on all routes
+- Root route for health checks
+- KV and D1 bindings configured
+- TypeScript
+
+## API Routes
+- `GET /` — Service info
+- `GET /api/health` — Health check
+- `GET /api/hello` — Example endpoint
+- `GET /api/kv/:key` — KV read
+- `POST /api/kv/:key` — KV write

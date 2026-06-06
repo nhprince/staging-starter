@@ -16,8 +16,8 @@ interface TestSuite {
   tests: TestResult[];
 }
 
-const BACKEND_URL = "https://staging-starter.nurulhudaprince18.workers.dev";
-const FRONTEND_URL = "https://staging-starter.pages.dev";
+const BACKEND_URL = "https://saturday.nurulhudaprince18.workers.dev";
+const FRONTEND_URL = "https://saturday-62d.pages.dev";
 
 /* ===== SVG SCORE RING ===== */
 function ScoreRing({ score, total }: { score: number; total: number }) {
@@ -395,7 +395,7 @@ export default function Home() {
     // GitHub Actions
     updateTest(4, 0, { status: "running" });
     try {
-      const res = await fetch("https://api.github.com/repos/nhprince/staging-starter/actions/runs?per_page=1", { signal: AbortSignal.timeout(10000) });
+      const res = await fetch("https://api.github.com/repos/nhprince/saturday/actions/runs?per_page=1", { signal: AbortSignal.timeout(10000) });
       const data = await res.json();
       const run = data.workflow_runs?.[0];
       if (run) {
@@ -407,7 +407,7 @@ export default function Home() {
     // Deploy Config
     updateTest(4, 1, { status: "running" });
     try {
-      const res = await fetch("https://api.github.com/repos/nhprince/staging-starter/actions/workflows/deploy.yml", { signal: AbortSignal.timeout(10000) });
+      const res = await fetch("https://api.github.com/repos/nhprince/saturday/actions/workflows/deploy.yml", { signal: AbortSignal.timeout(10000) });
       const data = await res.json();
       updateTest(4, 1, { status: data.state === "active" ? "pass" : "warn", message: data.state === "active" ? "Workflow active" : `State: ${data.state}` });
     } catch (e: any) { updateTest(4, 1, { status: "warn", message: e.message }); }
@@ -494,11 +494,11 @@ export default function Home() {
             <span className="font-semibold text-[var(--accent-indigo)]">Cloudflare Pages + Workers</span>
           </p>
           <div className="mt-2 flex flex-wrap justify-center gap-3 text-[10px] text-[var(--text-muted)]">
-            <a href="https://staging-starter.pages.dev" target="_blank" rel="noreferrer" className="hover:text-[var(--accent-indigo)] transition-colors">Frontend ↗</a>
+            <a href="https://saturday-62d.pages.dev" target="_blank" rel="noreferrer" className="hover:text-[var(--accent-indigo)] transition-colors">Frontend ↗</a>
             <span>·</span>
-            <a href="https://staging-starter.nurulhudaprince18.workers.dev" target="_blank" rel="noreferrer" className="hover:text-[var(--accent-indigo)] transition-colors">Backend ↗</a>
+            <a href="https://saturday.nurulhudaprince18.workers.dev" target="_blank" rel="noreferrer" className="hover:text-[var(--accent-indigo)] transition-colors">Backend ↗</a>
             <span>·</span>
-            <a href="https://github.com/nhprince/staging-starter" target="_blank" rel="noreferrer" className="hover:text-[var(--accent-indigo)] transition-colors">Source ↗</a>
+            <a href="https://github.com/nhprince/saturday" target="_blank" rel="noreferrer" className="hover:text-[var(--accent-indigo)] transition-colors">Source ↗</a>
           </div>
         </footer>
       </div>

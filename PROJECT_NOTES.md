@@ -1,47 +1,44 @@
-# Staging Starter — Project Notes
+# Saturday — Project Notes
 
-## Quick Reference
-- **Repo:** https://github.com/nhprince/staging-starter
-- **Frontend:** https://staging-starter.pages.dev
-- **Backend:** https://staging-starter.nurulhudaprince18.workers.dev
-- **Local:** ~/staging-starter/
+## Quick Info
+- **Repo:** https://github.com/nhprince/saturday
+- **Frontend:** https://saturday-62d.pages.dev
+- **Backend:** https://saturday.nurulhudaprince18.workers.dev
+- **Local:** ~/saturday/
+- **Server Guide:** https://github.com/nhprince/server-setup-guide
 
-## Tech Stack
-- Frontend: Next.js (static export) → Cloudflare Pages
-- Backend: Hono → Cloudflare Workers
-- Database: D1 (SQLite)
-- Storage: KV namespace
-- CI/CD: GitHub Actions (auto-deploy on push)
-
-## Cloudflare
-- Account ID: 89f7e2d36d8ec57f55770ee400685f53
-- KV Namespace ID: 7b004b371012438ebe4500ef6a4e2361
-- D1 Database ID: 1c83b423-7b72-4ebe-a321-53a8ecc667ee
+## Cloudflare Resources
+- **Account ID:** 89f7e2d36d8ec57f55770ee400685f53
+- **KV Namespace ID:** 63858eda52204fb6af299d8c9dfeccce
+- **D1 Database ID:** 18acbc13-4c3d-4024-aafe-98187fd8d382
+- **Pages Project:** saturday (saturday-62d.pages.dev)
+- **Worker:** saturday (saturday.nurulhudaprince18.workers.dev)
 
 ## Commands
 ```bash
-# Work on project
-cd ~/staging-starter
+# Local dev
+cd ~/saturday
+pnpm dev:frontend  # http://localhost:3000
+pnpm dev:backend   # http://localhost:8787
 
-# Edit code, then deploy:
-git add -A && git commit -m "..." && git push
+# Deploy manually
+cd frontend && pnpm build && wrangler pages deploy out --project-name=saturday
+cd backend && wrangler deploy
 
-# Check deployment status:
-gh run list --limit 3
-
-# View logs:
-gh run view <run-id> --log
+# Create new project
+python3 scripts/new-project.py --type blog --name my-blog
 ```
 
-## What We Built
-- Full-stack template with dual deployment (Cloudflare default, VPS fallback)
-- Professional test dashboard with 19 diagnostic tests across 5 categories
-- Dark theme UI with glassmorphism, micro-animations, SVG score ring
-- Auto-deploy pipeline via GitHub Actions
+## CI/CD
+- Push to `main` → auto-deploys to Cloudflare
+- Manual VPS deploy: GitHub Actions → Deploy → Run workflow → select "server"
 
-## Next Steps (When Resuming)
-- Build actual projects using this template
-- Add more backend API endpoints
-- Connect D1 database queries
-- Add authentication (Clerk)
-- Deploy custom domain
+## Skills
+17 framework skills in `skills/` directory + `~/.hermes/skills/`
+
+## Status
+- ✅ All 12 phases complete
+- ✅ CI/CD passing
+- ✅ Backend live
+- ✅ Frontend live
+- ✅ Server guide cross-linked

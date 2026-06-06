@@ -8,19 +8,19 @@ export interface Env {
 
 const app = new Hono<{ Bindings: Env }>();
 
-// CORS — applied to all routes, exposes cf-ray for dashboard tests
+// CORS — applied to all routes
 app.use("*", cors({
   origin: "*",
   allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowHeaders: ["Content-Type", "Authorization"],
-  exposeHeaders: ["cf-ray", "cf-cache-status", "cf-poop", "x-powered-by", "server"],
+  exposeHeaders: ["cf-ray", "cf-cache-status"],
   maxAge: 86400,
 }));
 
-// Root — Worker routing check
+// Root — Service info
 app.get("/", (c) => {
   return c.json({
-    service: "staging-starter",
+    service: "saturday",
     status: "running",
     version: "1.0.0",
     endpoints: ["/api/health", "/api/hello", "/api/kv/:key"],
@@ -45,7 +45,7 @@ app.get("/api/hello", (c) => {
   });
 });
 
-// Example: KV read/write
+// KV read/write
 app.get("/api/kv/:key", async (c) => {
   const key = c.req.param("key");
   const value = await c.env.KV.get(key);
