@@ -8,7 +8,3 @@ compatibility_flags = ["nodejs_compat"]
 binding = "KV"
 id = "63858eda52204fb6af299d8c9dfeccce"
 
-[[d1_databases]]
-binding = "DB"
-database_name = "saturday-db"
-database_id = "18acbc13-4c3d-4024-aafe-98187fd8d382"
