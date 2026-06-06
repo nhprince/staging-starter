@@ -1,26 +1,35 @@
--- Landing Page Scaffold — D1 Database Schema
+-- Landing Page Scaffold — Database Schema
 -- Cloudflare D1 (SQLite) compatible
 
--- Leads (from contact/subscribe forms)
-CREATE TABLE IF NOT EXISTS leads (
+-- Contact form submissions
+CREATE TABLE IF NOT EXISTS submissions (
   id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
   email TEXT NOT NULL,
-  name TEXT,
-  source TEXT,                   -- which page/form
-  metadata TEXT,                 -- JSON (utm params, etc.)
-  subscribed BOOLEAN DEFAULT TRUE,
+  message TEXT,
+  source TEXT DEFAULT 'contact',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Page analytics (simple counter)
-CREATE TABLE IF NOT EXISTS page_views (
-  path TEXT NOT NULL,
-  date TEXT NOT NULL,            -- YYYY-MM-DD
-  count INTEGER DEFAULT 0,
-  PRIMARY KEY (path, date)
+-- Newsletter subscribers
+CREATE TABLE IF NOT EXISTS subscribers (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  name TEXT,
+  verified BOOLEAN DEFAULT FALSE,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_leads_email ON leads(email);
-CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at);
-CREATE INDEX IF NOT EXISTS idx_leads_source ON leads(source);
+-- Page analytics (simple)
+CREATE TABLE IF NOT EXISTS page_views (
+  id TEXT PRIMARY KEY,
+  path TEXT NOT NULL,
+  referrer TEXT,
+  user_agent TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_submissions_email ON submissions(email);
+CREATE INDEX IF NOT EXISTS idx_subscribers_email ON subscribers(email);
+CREATE INDEX IF NOT EXISTS idx_page_views_path ON page_views(path);
+CREATE INDEX IF NOT EXISTS idx_page_views_created ON page_views(created_at);
