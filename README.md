@@ -1,162 +1,220 @@
-# 🏗️ Saturday Framework
+<div align="center">
 
-> **Build any web project. 100% free infrastructure. Agent-driven.**
+# ✦ Saturday Framework
 
-## Quick Start
+**Build any web project. 100% free. Fully automated.**
+
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-F6821F?logo=cloudflare&logoColor=white)](https://cloudflare.com)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org)
+[![Hono](https://img.shields.io/badge/Hono-E36002?logo=hono&logoColor=white)](https://hono.dev)
+[![D1](https://img.shields.io/badge/D1-SQLite-00A9FF)](https://developers.cloudflare.com/d1/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+[Quick Start](#-quick-start) · [Commands](#-commands) · [Scaffolds](#-scaffolds) · [Docs](FRAMEWORK.md) · [UX Plan](UX_PLAN.md)
+
+</div>
+
+---
+
+## 🚀 Quick Start
 
 ```bash
-# Tell Saturday:
-"Build me a blog called my-blog"
-"Create a SaaS called tiny-tools"
-"Make a portfolio site"
-"Build an API for my app"
-"Create a landing page for my product"
-"Build an e-commerce store"
+# Install the CLI
+npm install -g saturday
+
+# Create your first project
+saturday new blog my-blog
+
+# Start developing
+cd ~/projects/my-blog
+saturday dev
+
+# Deploy to Cloudflare
+saturday deploy
+
+# Verify deployment
+saturday verify
 ```
 
-Saturday handles everything: scaffold → configure → deploy → verify.
+**That's it.** Your blog is live at `https://my-blog-xxx.pages.dev`.
 
-## Framework Structure
+---
 
-```
-saturday/
-├── scaffolds/           # Complete project blueprints
-│   ├── blog/           # MDX blog with admin, RSS, SEO
-│   ├── saas/           # SaaS with auth, billing, dashboard
-│   ├── portfolio/      # Developer portfolio
-│   ├── api/            # REST API with docs
-│   ├── ecommerce/      # Store with Stripe
-│   └── landing/        # Marketing site
-├── frontends/          # Frontend framework options
-│   ├── nextjs/         # Next.js (default)
-│   ├── astro/          # Astro (fast builds)
-│   ├── sveltekit/      # SvelteKit (interactive)
-│   └── static-html/    # Pure HTML (no build)
-├── backends/           # Backend runtime options
-│   ├── hono-workers/   # Hono on CF Workers (default)
-│   ├── python-vps/     # FastAPI on VPS
-│   └── php-vps/        # PHP on VPS
-├── databases/          # Database adapters
-│   ├── d1/             # Cloudflare D1 (SQLite, default)
-│   ├── postgres-vps/   # PostgreSQL on VPS
-│   ├── supabase/       # Supabase (managed Postgres)
-│   └── planetscale/    # PlanetScale (managed MySQL)
-├── auth/               # Auth provider modules
-│   ├── clerk/          # Clerk (managed, easiest)
-│   ├── authjs/         # Auth.js (flexible)
-│   └── lucia/          # Lucia (lightweight)
-├── modules/            # Feature modules (plugins)
-│   ├── cms/            # Headless CMS
-│   ├── comments/       # Comment system
-│   ├── payments-stripe/# Stripe payments
-│   ├── email/          # Transactional email
-│   ├── file-upload/    # R2 file uploads
-│   └── analytics/      # Privacy-friendly analytics
-├── deploy/             # Deployment configurations
-│   ├── cloudflare-pages/
-│   ├── cloudflare-workers/
-│   └── vps-ssh/
-├── scripts/            # Automation scripts
-│   └── new-project.py  # Project generator
-└── skills/             # Saturday skills for building
-    ├── framework/      # Framework-level skills
-    ├── project-types/  # Project-type build skills
-    ├── frontends/      # Frontend skills
-    ├── backends/       # Backend skills
-    ├── auth/           # Auth skills
-    ├── databases/      # Database skills
-    ├── modules/        # Module skills
-    ├── deploy/         # Deployment skills
-    └── testing/        # Testing skills
+## ✨ What is Saturday?
+
+Saturday is a **full-stack web development framework** where:
+
+> *"Tell Saturday what you want to build. It scaffolds, configures, deploys, and verifies — fully automated. Zero manual steps. 100% free infrastructure."*
+
+### Key Features
+
+- **🤖 Agent-Driven** — Built for AI agents. Every command works non-interactively with `--yes` and `--json` flags
+- **💰 100% Free** — Cloudflare free tier handles everything. No credit card needed
+- **⚡ Edge-First** — Your app runs at 300+ locations worldwide via Cloudflare
+- **🎨 Beautiful Design** — Dark theme with glassmorphism, gradient accents, micro-animations
+- **🔄 Auto Deploy** — Push to `main` → GitHub Actions builds → deploys to Cloudflare
+- **🔒 Secure** — HTTPS enforced, security headers automatic, D1 database with encryption
+
+---
+
+## 📦 Tech Stack
+
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| **Frontend** | Next.js 14 (App Router) | Static export, React, great DX |
+| **Backend** | Hono on Cloudflare Workers | Fast, lightweight, edge-deployed |
+| **Database** | Cloudflare D1 (SQLite) | Serverless, zero-config, free |
+| **Storage** | Cloudflare KV + R2 | Key-value and object storage |
+| **Deployment** | Cloudflare Pages + Workers | Automatic via GitHub Actions |
+| **CLI** | TypeScript/Node.js | Cross-platform, agent-friendly |
+
+**100% free on Cloudflare's free tier.**
+
+---
+
+## 🛠 Commands
+
+### Project Management
+
+```bash
+saturday new <type> <name>     # Create a new project from a scaffold
+saturday dev                    # Start local development (frontend + backend)
+saturday deploy                 # Deploy to Cloudflare
+saturday status                 # Show project status
+saturday verify                 # Verify deployment health
+saturday rollback               # Rollback to previous deployment
+saturday destroy <name>         # Remove project completely
 ```
 
-## Project Types
+### Configuration
 
-| Type | Stack | Deploy |
-|------|-------|--------|
-| **Blog** | Next.js + Hono + D1 | CF Pages + Workers |
-| **SaaS** | Next.js + Hono + D1 + Clerk + Stripe | CF Pages + Workers |
-| **Portfolio** | Next.js (static) + Hono + D1 | CF Pages + Workers |
-| **API** | Hono + D1 | CF Workers |
-| **E-Commerce** | Next.js + Hono + D1 + Stripe | CF Pages + Workers |
-| **Landing** | Next.js (static) + Hono + D1 | CF Pages + Workers |
-
-## Free Infrastructure
-
-| Service | Free Tier |
-|---------|-----------|
-| Cloudflare Pages | Unlimited bandwidth |
-| Cloudflare Workers | 100K requests/day |
-| Cloudflare D1 | 5GB, 5M reads/day |
-| Cloudflare KV | 100K reads/day |
-| Cloudflare R2 | 10GB storage |
-| GitHub Actions | 2,000 min/month |
-| GitHub Repos | Unlimited |
-| OpenRouter | Multiple free models |
-| Clerk | 10K MAU |
-| Stripe | Free to set up (2.9% + 30¢/tx) |
-| Resend | 3,000 emails/month |
-
-## Prince's UI Standards
-
-Every scaffold includes:
-- **Dark theme** — `#0a0a0f` background
-- **Glassmorphism** — `backdrop-blur` cards with subtle borders
-- **Gradient accents** — indigo → purple
-- **Micro-animations** — staggered entrance, hover +2px lift
-- **Responsive** — mobile-first design
-- **Typography** — Inter font, clear hierarchy
-
-## How Saturday Builds
-
-```
-Prince: "Build me a blog called my-blog"
-  ↓
-1. scaffold-project (create repo, CF resources)
-2. add-database (D1 schema)
-3. add-auth (Clerk for admin)
-4. Build frontend (Next.js + MDX)
-5. Build backend (Hono API)
-6. Deploy (git push → auto)
-7. Verify (health checks)
-  ↓
-Returns: live URLs
+```bash
+saturday config show            # Show full configuration
+saturday config get <key>       # Get a config value (dot notation)
+saturday config set <key> <val> # Set a config value
+saturday config validate        # Validate saturday.yaml
+saturday secrets list           # List environment variables
+saturday secrets set <key> <val> # Set a secret
 ```
 
-## Skills
+### Setup & Diagnostics
 
-Saturday uses skills from `skills/` directory to build projects. Each skill contains:
-- Overview and when to use
-- Step-by-step workflow
-- Common pitfalls
-- Verification checklist
-- Agent tips
+```bash
+saturday init                   # First-time setup wizard
+saturday setup                  # Set up Cloudflare resources (KV, D1, Pages)
+saturday doctor                 # Diagnose and fix common issues
+saturday update                 # Update framework
+saturday projects               # List all projects
+```
 
-## Contributing
+### Agent Automation
 
-To add a new scaffold:
-1. Create directory in `scaffolds/<type>/`
-2. Add README.md with stack, features, usage
-3. Add database schema in `database/schema.sql`
-4. Create build skill in `skills/project-types/build-<type>.md`
-5. Update this file
+Every command supports `--yes` (skip prompts) and `--json` (machine-readable output):
 
-To add a new module:
-1. Create directory in `modules/<name>/`
-2. Add README.md with setup instructions
-3. Add database schema if needed
-4. Create skill in `skills/modules/<name>.md`
+```bash
+# Non-interactive project creation
+saturday new blog my-blog --yes --json
 
-## Connect with the AI VPS Setup Guide
+# Automated deployment with verification
+saturday deploy --yes && saturday verify --json
 
-This framework works seamlessly with the **[100% Free AI Agent Driven Development Workflow](https://github.com/nhprince/server-setup-guide)** guide:
+# Health check (returns JSON)
+saturday status --json
+```
 
-- ✅ Use the guide to set up your AI agent (Saturday) on a free VPS
-- ✅ Then use Saturday to build projects with 100% free infrastructure
-- ✅ The guide includes Saturday-specific commands and workflows
+---
 
-**Live Dashboard:** [saturday-62d.pages.dev](https://saturday-62d.pages.dev)
+## 📁 Scaffolds
 
-**Recommended next step:** [Follow the server setup guide →](https://github.com/nhprince/server-setup-guide)
+Pre-built project templates. Each includes frontend, backend, database schema, and CI/CD.
 
-> **🤖 Agent Tip:** Just say *"Set up my VPS using the AI Agent guide"* and Saturday will handle all the server configuration automatically.
+| Scaffold | Status | Description |
+|----------|--------|-------------|
+| **Blog** | ✅ Complete | Full blog with posts, categories, tags, MDX |
+| **Landing** | ✅ Complete | Marketing page with hero, features, contact form |
+| **Portfolio** | ✅ Complete | Developer portfolio with projects, skills, experience |
+| **SaaS** | 📝 Planned | SaaS application with auth, payments, dashboard |
+| **API** | 📝 Planned | RESTful API with documentation |
+| **E-commerce** | 📝 Planned | Online store with Stripe payments |
+
+---
+
+## 🏗 Architecture
+
+```
+my-project/
+├── saturday.yaml          # Project configuration (single source of truth)
+├── frontend/              # Next.js 14 (static export)
+│   ├── src/app/           # App Router pages
+│   ├── src/components/    # React components
+│   └── out/               # Static export output
+├── backend/               # Hono on Cloudflare Workers
+│   ├── src/index.ts       # Worker entry point
+│   └── wrangler.toml      # Worker configuration
+├── database/
+│   └── schema.sql         # D1 database schema
+├── .github/workflows/
+│   └── deploy.yml         # CI/CD pipeline
+└── README.md
+```
+
+---
+
+## 🔄 Workflow
+
+### For Developers
+
+```bash
+# 1. Create
+saturday new landing my-landing
+
+# 2. Develop
+cd ~/projects/my-landing
+saturday dev
+
+# 3. Deploy
+saturday deploy
+
+# 4. Verify
+saturday verify
+```
+
+### For AI Agents
+
+```bash
+# Fully automated — zero human intervention
+saturday new blog tech-notes --auth clerk --yes --json
+cd ~/projects/tech-notes
+saturday setup --yes
+saturday deploy --yes
+saturday verify --json
+# Returns: { success: true, urls: { pages: "...", worker: "..." } }
+```
+
+---
+
+## 📖 Documentation
+
+- [Framework Architecture](FRAMEWORK.md) — Detailed technical documentation
+- [UX Enhancement Plan](UX_PLAN.md) — UX research and implementation plan
+- [Implementation Plan](PLAN.md) — 12-phase development plan
+
+---
+
+## 🤝 Contributing
+
+Saturday is open source and built for the community. Contributions welcome!
+
+---
+
+## 📝 License
+
+MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+**Built with ❤️ by [Prince](https://github.com/nhprince) · Powered by [Cloudflare](https://cloudflare.com)**
+
+</div>
