@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 /* ===== TYPES ===== */
 interface Project {
@@ -23,7 +23,63 @@ interface TestResult {
   duration?: number;
 }
 
-/* ===== SAMPLE PROJECTS ===== */
+/* ===== API INTEGRATION ===== */
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+interface HealthData {
+  status: string;
+  message: string;
+  timestamp: string;
+}
+
+interface ProjectsData {
+  projects?: Array<{
+    id: string;
+    name: string;
+    type?: string;
+    frontendUrl?: string;
+    backendUrl?: string;
+    githubUrl?: string;
+    lastDeploy?: string;
+  }>;
+}
+
+// Fetch real health data from Worker
+async function fetchHealth(): Promise<HealthData | null> {
+  if (!API_URL) return null;
+  try {
+    const res = await fetch(`${API_URL}/api/health`, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+// Fetch projects from Worker KV
+async function fetchProjectsFromApi(): Promise<Project[]> {
+  if (!API_URL) return SAMPLE_PROJECTS;
+  try {
+    const res = await fetch(`${API_URL}/api/projects`, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) return SAMPLE_PROJECTS;
+    const data: ProjectsData = await res.json();
+    if (!data.projects?.length) return SAMPLE_PROJECTS;
+    return data.projects.map((p, i) => ({
+      id: p.id || String(i + 1),
+      name: p.name || "Untitled",
+      type: p.type || "Project",
+      status: "healthy" as const,
+      frontendUrl: p.frontendUrl || "#",
+      backendUrl: p.backendUrl || "#",
+      githubUrl: p.githubUrl || "#",
+      lastDeploy: p.lastDeploy || "Unknown",
+      testsPassed: 0,
+      testsTotal: 0,
+    }));
+  } catch {
+    return SAMPLE_PROJECTS;
+  }
+}
 const SAMPLE_PROJECTS: Project[] = [
   {
     id: "1",
@@ -134,28 +190,86 @@ function TestModal({ project, onClose }: { project: Project; onClose: () => void
   const runTests = useCallback(async () => {
     setRunning(true);
     const initial: TestResult[] = [
-      { name: "Frontend Load", status: "pending", message: "Checking..." },
       { name: "Backend Health", status: "pending", message: "Checking..." },
       { name: "API Response", status: "pending", message: "Checking..." },
       { name: "CORS Headers", status: "pending", message: "Checking..." },
-      { name: "Security Headers", status: "pending", message: "Checking..." },
+      { name: "Root Endpoint", status: "pending", message: "Checking..." },
+      { name: "KV Read/Write", status: "pending", message: "Checking..." },
     ];
     setTests(initial);
 
-    // Simulate running tests
+    const backendUrl = project.backendUrl || API_URL;
+
     for (let i = 0; i < initial.length; i++) {
       setTests(prev => prev.map((t, idx) => idx === i ? { ...t, status: "running" } : t));
-      await new Promise(r => setTimeout(r, 500));
-      const passed = Math.random() > 0.2;
-      setTests(prev => prev.map((t, idx) => idx === i ? {
-        ...t,
-        status: passed ? "pass" : "warn",
-        message: passed ? "OK" : "Warning",
-        duration: Math.floor(Math.random() * 200) + 50,
-      } : t));
+      await new Promise(r => setTimeout(r, 300));
+
+      let result: { status: "pass" | "warn" | "fail"; message: string; duration: number };
+      const start = Date.now();
+
+      try {
+        if (i === 0) {
+          // Backend health check
+          const res = await fetch(`${backendUrl}/api/health`, { signal: AbortSignal.timeout(5000) });
+          const data = await res.json().catch(() => null);
+          result = res.ok && data?.status === "ok"
+            ? { status: "pass", message: `Healthy — ${data.message}`, duration: Date.now() - start }
+            : { status: "warn", message: `Responded but unexpected: ${res.status}`, duration: Date.now() - start };
+        } else if (i === 1) {
+          // API response check
+          const res = await fetch(`${backendUrl}/api/hello`, { signal: AbortSignal.timeout(5000) });
+          const data = await res.json().catch(() => null);
+          result = res.ok && data?.message
+            ? { status: "pass", message: data.message, duration: Date.now() - start }
+            : { status: "warn", message: "No JSON response", duration: Date.now() - start };
+        } else if (i === 2) {
+          // CORS headers check
+          const res = await fetch(`${backendUrl}/api/health`, {
+            method: "OPTIONS",
+            signal: AbortSignal.timeout(5000),
+          });
+          const corsHeader = res.headers.get("access-control-allow-origin");
+          result = corsHeader
+            ? { status: "pass", message: `CORS enabled: ${corsHeader}`, duration: Date.now() - start }
+            : { status: "warn", message: "CORS headers missing", duration: Date.now() - start };
+        } else if (i === 3) {
+          // Root endpoint check
+          const res = await fetch(`${backendUrl}/`, { signal: AbortSignal.timeout(5000) });
+          const data = await res.json().catch(() => null);
+          result = res.ok && data?.service
+            ? { status: "pass", message: `Service: ${data.service} v${data.version}`, duration: Date.now() - start }
+            : { status: "warn", message: "Root endpoint issue", duration: Date.now() - start };
+        } else {
+          // KV check
+          const testKey = `test-${Date.now()}`;
+          const writeRes = await fetch(`${backendUrl}/api/kv/${testKey}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ test: true, ts: Date.now() }),
+            signal: AbortSignal.timeout(5000),
+          });
+          if (writeRes.ok) {
+            const readRes = await fetch(`${backendUrl}/api/kv/${testKey}`, { signal: AbortSignal.timeout(5000) });
+            const readData = await readRes.json().catch(() => null);
+            result = readData?.value
+              ? { status: "pass", message: "KV read/write working", duration: Date.now() - start }
+              : { status: "warn", message: "KV write OK but read failed", duration: Date.now() - start };
+          } else {
+            result = { status: "warn", message: "KV write failed (KV may not be configured)", duration: Date.now() - start };
+          }
+        }
+      } catch (err: any) {
+        result = {
+          status: "fail",
+          message: err.name === "TimeoutError" ? "Connection timed out" : err.message || "Failed",
+          duration: Date.now() - start,
+        };
+      }
+
+      setTests(prev => prev.map((t, idx) => idx === i ? { ...t, ...result } : t));
     }
     setRunning(false);
-  }, []);
+  }, [project.backendUrl]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
@@ -201,6 +315,13 @@ export default function Home() {
   const [projects, setProjects] = useState<Project[]>(SAMPLE_PROJECTS);
   const [testingProject, setTestingProject] = useState<Project | null>(null);
   const [activeTab, setActiveTab] = useState<"projects" | "tests">("projects");
+  const [backendHealth, setBackendHealth] = useState<HealthData | null>(null);
+
+  // Load projects from API on mount
+  useEffect(() => {
+    fetchProjectsFromApi().then(setProjects);
+    fetchHealth().then(setBackendHealth);
+  }, []);
 
   const totalPassed = projects.reduce((s, p) => s + p.testsPassed, 0);
   const totalTests = projects.reduce((s, p) => s + p.testsTotal, 0);
@@ -216,7 +337,20 @@ export default function Home() {
               <div className="w-9 h-9 rounded-xl bg-[var(--gradient-main)] flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-indigo-500/20">✦</div>
               <div>
                 <h1 className="text-base md:text-lg font-bold tracking-tight">Project Dashboard</h1>
-                <p className="text-[11px] text-[var(--text-muted)]">{projects.length} projects · {totalPassed}/{totalTests} tests passing</p>
+                <p className="text-[11px] text-[var(--text-muted)]">
+                  {projects.length} projects
+                  {backendHealth ? (
+                    <span className="ml-2 inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                      Backend online
+                    </span>
+                  ) : API_URL ? (
+                    <span className="ml-2 inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+                      Backend unreachable
+                    </span>
+                  ) : null}
+                </p>
               </div>
             </div>
             <div className="flex gap-2">

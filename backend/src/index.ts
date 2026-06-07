@@ -22,7 +22,7 @@ app.get("/", (c) => {
     service: "saturday",
     status: "running",
     version: "1.0.0",
-    endpoints: ["/api/health", "/api/hello", "/api/kv/:key"],
+    endpoints: ["/api/health", "/api/hello", "/api/kv/:key", "/api/projects"],
     timestamp: new Date().toISOString(),
   });
 });
@@ -56,6 +56,22 @@ app.post("/api/kv/:key", async (c) => {
   const body = await c.req.json();
   await c.env.KV.put(key, JSON.stringify(body));
   return c.json({ success: true, key });
+});
+
+// Projects list (from KV)
+app.get("/api/projects", async (c) => {
+  const projectsJson = await c.env.KV.get("saturday:projects");
+  if (projectsJson) {
+    return c.json({ projects: JSON.parse(projectsJson) });
+  }
+  return c.json({ projects: [] });
+});
+
+// Store projects (for dashboard)
+app.post("/api/projects", async (c) => {
+  const body = await c.req.json();
+  await c.env.KV.put("saturday:projects", JSON.stringify(body.projects || []));
+  return c.json({ success: true });
 });
 
 export default app;

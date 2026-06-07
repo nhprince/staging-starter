@@ -15,3 +15,4 @@ tests/e2e/node_modules
 tests/e2e/test-results
 tests/e2e/playwright-report
 tests/e2e/.cache
+frontend/tsconfig.tsbuildinfo
