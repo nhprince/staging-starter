@@ -5,7 +5,7 @@
 import { Command } from "commander";
 import { existsSync } from "fs";
 import { join } from "path";
-import { out, success, error, warn, info, run, readConfig } from "../lib/utils.js";
+import { out, success, error, warn, info, json, readConfig, run } from "../lib/utils.js";
 
 export function registerDeployCommand(program: Command) {
   program
@@ -20,50 +20,76 @@ export function registerDeployCommand(program: Command) {
           process.exit(1);
         }
 
-        out("");
-        info(`🚀 Deploying ${config.name} to ${options.env}...`);
-        out("");
+        const isJson = !!process.env.SATURDAY_JSON;
+
+        if (!isJson) {
+          out("");
+          info(`🚀 Deploying ${config.name} to ${options.env}...`);
+          out("");
+        }
+
+        const results: { step: string; status: "ok" | "error"; message: string }[] = [];
 
         // Build & deploy frontend
         const frontendDir = join(process.cwd(), "frontend");
         if (existsSync(frontendDir)) {
-          info("📦 Building frontend...");
-          run(`cd ${frontendDir} && pnpm build`);
-          success("Frontend built");
+          if (!isJson) info("📦 Building frontend...");
+          try {
+            run(`cd ${frontendDir} && pnpm build`);
+            results.push({ step: "Frontend build", status: "ok", message: "Built" });
+          } catch (e: any) {
+            results.push({ step: "Frontend build", status: "error", message: e.message });
+            throw e;
+          }
 
-          info("☁️  Deploying to Cloudflare Pages...");
-          const pagesProject = config.cloudflare.pages.project;
-          run(`cd ${frontendDir} && wrangler pages deploy out --project-name ${pagesProject} --branch main`);
-          success(`Frontend live: ${config.cloudflare.pages.url}`);
+          if (!isJson) info("☁️  Deploying to Cloudflare Pages...");
+          try {
+            const pagesProject = config.cloudflare.pages.project;
+            run(`cd ${frontendDir} && wrangler pages deploy out --project-name ${pagesProject} --branch main`);
+            results.push({ step: "Frontend deploy", status: "ok", message: config.cloudflare.pages.url });
+          } catch (e: any) {
+            results.push({ step: "Frontend deploy", status: "error", message: e.message });
+            throw e;
+          }
         }
 
         // Build & deploy backend
         const backendDir = join(process.cwd(), "backend");
         if (existsSync(backendDir)) {
-          info("⚡ Deploying Worker...");
-          run(`cd ${backendDir} && wrangler deploy`);
-          success(`Backend live: ${config.cloudflare.worker.url}`);
+          if (!isJson) info("⚡ Deploying Worker...");
+          try {
+            run(`cd ${backendDir} && wrangler deploy`);
+            results.push({ step: "Backend deploy", status: "ok", message: config.cloudflare.worker.url });
+          } catch (e: any) {
+            results.push({ step: "Backend deploy", status: "error", message: e.message });
+            throw e;
+          }
         }
 
         // Health check
-        info("🏥 Running health checks...");
+        if (!isJson) info("🏥 Running health checks...");
         try {
           const health = run(`curl -s ${config.cloudflare.worker.url}/api/health`);
           const data = JSON.parse(health);
           if (data.status === "ok") {
-            success("Health check passed");
+            results.push({ step: "Health check", status: "ok", message: "Passed" });
           } else {
-            warn("Health check returned unexpected response");
+            results.push({ step: "Health check", status: "error", message: "Unexpected response" });
           }
         } catch {
-          warn("Health check failed — service may still be starting");
+          results.push({ step: "Health check", status: "error", message: "Failed" });
         }
 
-        out("");
-        success(`Deployment complete!`);
-        info(`Frontend: ${config.cloudflare.pages.url}`);
-        info(`Backend:  ${config.cloudflare.worker.url}`);
-        out("");
+        if (isJson) {
+          const allOk = results.every((r) => r.status === "ok");
+          json({ success: allOk, steps: results });
+        } else {
+          out("");
+          success(`Deployment complete!`);
+          info(`Frontend: ${config.cloudflare.pages.url}`);
+          info(`Backend:  ${config.cloudflare.worker.url}`);
+          out("");
+        }
 
       } catch (e: any) {
         error(`Deploy failed: ${e.message}`);

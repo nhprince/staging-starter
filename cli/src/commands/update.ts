@@ -3,7 +3,7 @@
  */
 
 import { Command } from "commander";
-import { error, success, info, run } from "../lib/utils.js";
+import { error, success, info, json, run } from "../lib/utils.js";
 
 export function registerUpdateCommand(program: Command) {
   program
@@ -11,7 +11,9 @@ export function registerUpdateCommand(program: Command) {
     .description("Update Saturday framework")
     .action(async () => {
       try {
-        info("🔄 Checking for updates...");
+        const isJson = !!process.env.SATURDAY_JSON;
+
+        if (!isJson) info("🔄 Checking for updates...");
 
         // Pull latest from GitHub
         const frameworkDir = process.env.SATURDAY_HOME || "~/saturday";
@@ -20,7 +22,11 @@ export function registerUpdateCommand(program: Command) {
         // Rebuild CLI
         run(`cd ${frameworkDir}/cli && pnpm install && pnpm build`);
 
-        success("Saturday framework updated!");
+        if (isJson) {
+          json({ success: true, message: "Saturday framework updated" });
+        } else {
+          success("Saturday framework updated!");
+        }
       } catch (e: any) {
         error(e.message);
         process.exit(1);

@@ -5,7 +5,7 @@
 import { Command } from "commander";
 import { existsSync } from "fs";
 import { join } from "path";
-import { out, success, error, warn, info, runAsync, readConfig } from "../lib/utils.js";
+import { out, success, error, warn, info, json, readConfig, runAsync } from "../lib/utils.js";
 
 export function registerDevCommand(program: Command) {
   program
@@ -23,33 +23,33 @@ export function registerDevCommand(program: Command) {
 
         const frontendDir = join(process.cwd(), "frontend");
         const backendDir = join(process.cwd(), "backend");
+        const hasFrontend = existsSync(frontendDir);
+        const hasBackend = existsSync(backendDir);
 
-        out("");
-        info(`🚀 Starting local development for: ${config.name}`);
-        out("");
-
-        // Check frontend
-        if (existsSync(frontendDir)) {
-          info(`🎨 Frontend → http://localhost:${options.port}`);
+        if (process.env.SATURDAY_JSON) {
+          json({
+            project: config.name,
+            frontend: hasFrontend ? `http://localhost:${options.port}` : null,
+            backend: hasBackend ? `http://localhost:${options.apiPort}` : null,
+            status: "starting",
+          });
         } else {
-          warn("No frontend directory found");
+          out("");
+          info(`🚀 Starting local development for: ${config.name}`);
+          out("");
+          if (hasFrontend) info(`🎨 Frontend → http://localhost:${options.port}`);
+          else warn("No frontend directory found");
+          if (hasBackend) info(`⚡ Backend  → http://localhost:${options.apiPort}`);
+          else warn("No backend directory found");
+          out("");
+          info("Press Ctrl+C to stop");
+          out("");
         }
-
-        // Check backend
-        if (existsSync(backendDir)) {
-          info(`⚡ Backend  → http://localhost:${options.apiPort}`);
-        } else {
-          warn("No backend directory found");
-        }
-
-        out("");
-        info("Press Ctrl+C to stop");
-        out("");
 
         // Start both in parallel
         const promises: Promise<void>[] = [];
 
-        if (existsSync(frontendDir)) {
+        if (hasFrontend) {
           promises.push(
             runAsync(`cd ${frontendDir} && pnpm dev -- --port ${options.port}`, {
               onStdout: (d) => process.stdout.write(d),
@@ -58,7 +58,7 @@ export function registerDevCommand(program: Command) {
           );
         }
 
-        if (existsSync(backendDir)) {
+        if (hasBackend) {
           promises.push(
             runAsync(`cd ${backendDir} && pnpm dev -- --port ${options.apiPort}`, {
               onStdout: (d) => process.stdout.write(d),

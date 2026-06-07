@@ -3,7 +3,7 @@
  */
 
 import { Command } from "commander";
-import { error, info, readConfig, runAsync } from "../lib/utils.js";
+import { error, success, info, warn, json, readConfig, runAsync } from "../lib/utils.js";
 
 export function registerLogsCommand(program: Command) {
   program
@@ -16,6 +16,11 @@ export function registerLogsCommand(program: Command) {
         if (!config) {
           error("No saturday.yaml found. Run `saturday init` first.");
           process.exit(1);
+        }
+
+        if (process.env.SATURDAY_JSON) {
+          json({ worker: config.cloudflare.worker.name, status: "streaming", message: "Use `saturday logs` without --json to stream" });
+          return;
         }
 
         info(`📋 Streaming logs for: ${config.cloudflare.worker.name}`);

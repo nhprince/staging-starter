@@ -5,7 +5,7 @@
 import { Command } from "commander";
 import { existsSync } from "fs";
 import { join } from "path";
-import { out, success, error, warn, info, run, readConfig } from "../lib/utils.js";
+import { out, success, error, warn, info, json, readConfig, run } from "../lib/utils.js";
 
 export function registerRollbackCommand(program: Command) {
   program
@@ -19,16 +19,34 @@ export function registerRollbackCommand(program: Command) {
           process.exit(1);
         }
 
-        out("");
-        info(`⏪ Rolling back ${config.name}...`);
+        const isYes = !!process.env.SATURDAY_YES;
+        const isJson = !!process.env.SATURDAY_JSON;
+
+        if (!isYes && !isJson) {
+          const inquirer = (await import("inquirer")).default;
+          const { confirm } = await inquirer.prompt([{
+            type: "confirm",
+            name: "confirm",
+            message: `⏪ Rollback ${config.name} to previous deployment?`,
+            default: false,
+          }]);
+          if (!confirm) {
+            info("Aborted.");
+            return;
+          }
+        }
 
         // Git revert to previous commit
         const lastCommit = run("git log --oneline -2 | tail -1 | awk '{print $1}'");
         if (lastCommit) {
-          run(`git revert --no-edit HEAD`);
+          run("git revert --no-edit HEAD");
           run("git push origin main");
-          success("Rolled back to previous commit");
-          info("CI/CD will auto-deploy the rollback");
+          if (isJson) {
+            json({ success: true, message: "Rolled back to previous commit", commit: lastCommit });
+          } else {
+            success("Rolled back to previous commit");
+            info("CI/CD will auto-deploy the rollback");
+          }
         } else {
           warn("No previous commit found");
         }

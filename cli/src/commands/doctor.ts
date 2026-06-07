@@ -6,105 +6,92 @@ import { Command } from "commander";
 import { execSync } from "child_process";
 import { existsSync } from "fs";
 import { join } from "path";
-import { out, success, error, warn, info, readConfig, ErrorCode } from "../lib/utils.js";
+import { out, success, error, warn, info, json, readConfig, run, checkPrerequisites, ErrorCode } from "../lib/utils.js";
 
 export function registerDoctorCommand(program: Command) {
   program
     .command("doctor")
     .description("Diagnose and fix common issues")
     .action(async () => {
-      out("");
-      info("🏥 Saturday Doctor — Diagnosing...");
-      out("");
-
-      const issues: string[] = [];
-      const fixes: string[] = [];
+      const results: { check: string; status: "ok" | "warn" | "error"; message: string }[] = [];
 
       // Check Node.js
       try {
         const nodeVersion = execSync("node --version", { encoding: "utf-8" }).trim();
-        success(`Node.js: ${nodeVersion}`);
+        results.push({ check: "Node.js", status: "ok", message: nodeVersion });
       } catch {
-        issues.push("Node.js not found");
-        fixes.push("Install Node.js >= 18: https://nodejs.org");
+        results.push({ check: "Node.js", status: "error", message: "Not found. Install: https://nodejs.org" });
       }
 
       // Check pnpm
       try {
         const pnpmVersion = execSync("pnpm --version", { encoding: "utf-8" }).trim();
-        success(`pnpm: ${pnpmVersion}`);
+        results.push({ check: "pnpm", status: "ok", message: pnpmVersion });
       } catch {
-        issues.push("pnpm not found");
-        fixes.push("Install pnpm: npm install -g pnpm");
+        results.push({ check: "pnpm", status: "error", message: "Not found. Install: npm install -g pnpm" });
       }
 
       // Check wrangler
       try {
         const wranglerVersion = execSync("wrangler --version", { encoding: "utf-8" }).trim();
-        success(`wrangler: ${wranglerVersion}`);
+        results.push({ check: "wrangler", status: "ok", message: wranglerVersion });
       } catch {
-        issues.push("wrangler not found");
-        fixes.push("Install wrangler: npm install -g wrangler");
+        results.push({ check: "wrangler", status: "error", message: "Not found. Install: npm install -g wrangler" });
       }
 
       // Check wrangler auth
       try {
         execSync("wrangler whoami", { stdio: "pipe" });
-        success("Cloudflare: authenticated");
+        results.push({ check: "Cloudflare", status: "ok", message: "Authenticated" });
       } catch {
-        issues.push("Not authenticated with Cloudflare");
-        fixes.push("Run: wrangler login");
+        results.push({ check: "Cloudflare", status: "error", message: "Not authenticated. Run: wrangler login" });
       }
 
       // Check git
       try {
         const gitVersion = execSync("git --version", { encoding: "utf-8" }).trim();
-        success(`git: ${gitVersion}`);
+        results.push({ check: "git", status: "ok", message: gitVersion });
       } catch {
-        issues.push("git not found");
-        fixes.push("Install git: https://git-scm.com");
+        results.push({ check: "git", status: "error", message: "Not found. Install: https://git-scm.com" });
       }
 
       // Check gh CLI
       try {
         execSync("gh auth status", { stdio: "pipe" });
-        success("GitHub: authenticated");
+        results.push({ check: "GitHub", status: "ok", message: "Authenticated" });
       } catch {
-        issues.push("GitHub CLI not authenticated");
-        fixes.push("Run: gh auth login");
+        results.push({ check: "GitHub", status: "warn", message: "Not authenticated. Run: gh auth login" });
       }
 
       // Check saturday.yaml
       const config = readConfig();
       if (config) {
-        success(`saturday.yaml: found (${config.name})`);
-
-        // Check Cloudflare resources
-        if (config.cloudflare?.d1?.database_id) {
-          try {
-            execSync(`wrangler d1 info ${config.cloudflare.d1.database_name}`, { stdio: "pipe" });
-            success(`D1 database: ${config.cloudflare.d1.database_name}`);
-          } catch {
-            issues.push(`D1 database not found: ${config.cloudflare.d1.database_name}`);
-            fixes.push("Run: saturday setup");
-          }
-        }
+        results.push({ check: "saturday.yaml", status: "ok", message: `Found (${config.name})` });
       } else {
-        warn("saturday.yaml: not found (run `saturday init`)");
+        results.push({ check: "saturday.yaml", status: "warn", message: "Not found. Run: saturday init" });
       }
 
-      // Summary
-      out("");
-      if (issues.length === 0) {
-        success("All checks passed! Your environment is ready.");
+      // Output
+      if (process.env.SATURDAY_JSON) {
+        const allOk = results.every((r) => r.status !== "error");
+        json({ success: allOk, checks: results });
       } else {
-        warn(`Found ${issues.length} issue(s):`);
         out("");
-        issues.forEach((issue, i) => {
-          info(`  ${i + 1}. ${issue}`);
-          info(`     Fix: ${fixes[i]}`);
-        });
+        info("🏥 Saturday Doctor — Diagnosing...");
+        out("");
+        for (const r of results) {
+          if (r.status === "ok") success(`✓ ${r.check}: ${r.message}`);
+          else if (r.status === "warn") warn(`⚠️  ${r.check}: ${r.message}`);
+          else error(`❌ ${r.check}: ${r.message}`);
+        }
+        out("");
+        const errors = results.filter((r) => r.status === "error");
+        if (errors.length === 0) {
+          success("All checks passed! Your environment is ready.");
+        } else {
+          warn(`Found ${errors.length} issue(s). See above for fixes.`);
+        }
+        out("");
       }
-      out("");
     });
 }
