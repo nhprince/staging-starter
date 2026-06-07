@@ -130,239 +130,62 @@ export async function syncUiCache(source: "curated" | "full" = "curated"): Promi
 }
 
 function getCuratedRegistry(): UiCache {
-  // Embedded curated components — hand-picked for quality
-  const curated: UiComponent[] = [
-    {
-      id: "hero-01",
-      name: "Hero Section — Gradient",
-      slug: "hero-gradient",
-      description: "A stunning gradient hero section with CTA buttons, animated background, and responsive layout",
-      author: "Saturday",
-      author_username: "saturday-framework",
-      downloads: 0,
-      likes: 0,
-      tags: ["hero", "landing", "gradient", "cta", "animated"],
-      categories: ["hero", "landing-page"],
-      dependencies: { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
-      devDependencies: {},
-      license: "MIT",
-      source: "curated",
-      code_url: "https://raw.githubusercontent.com/nhprince/saturday/main/ui/components/hero-gradient.tsx",
-      demo_url: "",
-      preview_url: "",
-      tailwind_config_url: null,
-      global_css_url: null,
-      version: "1.0.0",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "hero-02",
-      name: "Hero Section — Minimal",
-      slug: "hero-minimal",
-      description: "Clean minimal hero with typography focus, subtle animations, and dark mode support",
-      author: "Saturday",
-      author_username: "saturday-framework",
-      downloads: 0,
-      likes: 0,
-      tags: ["hero", "landing", "minimal", "typography", "dark-mode"],
-      categories: ["hero", "landing-page"],
-      dependencies: { "framer-motion": "^11.0.0" },
-      devDependencies: {},
-      license: "MIT",
-      source: "curated",
-      code_url: "https://raw.githubusercontent.com/nhprince/saturday/main/ui/components/hero-minimal.tsx",
-      demo_url: "",
-      preview_url: "",
-      tailwind_config_url: null,
-      global_css_url: null,
-      version: "1.0.0",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "features-01",
-      name: "Features Grid",
-      slug: "features-grid",
-      description: "Responsive features grid with icons, hover effects, and staggered animations",
-      author: "Saturday",
-      author_username: "saturday-framework",
-      downloads: 0,
-      likes: 0,
-      tags: ["features", "grid", "icons", "hover", "animated"],
-      categories: ["features", "landing-page"],
-      dependencies: { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
-      devDependencies: {},
-      license: "MIT",
-      source: "curated",
-      code_url: "https://raw.githubusercontent.com/nhprince/saturday/main/ui/components/features-grid.tsx",
-      demo_url: "",
-      preview_url: "",
-      tailwind_config_url: null,
-      global_css_url: null,
-      version: "1.0.0",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "navbar-01",
-      name: "Navigation Bar — Glassmorphism",
-      slug: "navbar-glass",
-      description: "Glassmorphism navbar with blur effect, mobile menu, and scroll-aware styling",
-      author: "Saturday",
-      author_username: "saturday-framework",
-      downloads: 0,
-      likes: 0,
-      tags: ["navbar", "navigation", "glassmorphism", "mobile", "responsive"],
-      categories: ["navigation", "ui"],
-      dependencies: { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
-      devDependencies: {},
-      license: "MIT",
-      source: "curated",
-      code_url: "https://raw.githubusercontent.com/nhprince/saturday/main/ui/components/navbar-glass.tsx",
-      demo_url: "",
-      preview_url: "",
-      tailwind_config_url: null,
-      global_css_url: null,
-      version: "1.0.0",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "footer-01",
-      name: "Footer — Modern",
-      slug: "footer-modern",
-      description: "Modern footer with links, social icons, newsletter signup, and multi-column layout",
-      author: "Saturday",
-      author_username: "saturday-framework",
-      downloads: 0,
-      likes: 0,
-      tags: ["footer", "links", "social", "newsletter", "responsive"],
-      categories: ["footer", "ui"],
-      dependencies: { "lucide-react": "^0.400.0" },
-      devDependencies: {},
-      license: "MIT",
-      source: "curated",
-      code_url: "https://raw.githubusercontent.com/nhprince/saturday/main/ui/components/footer-modern.tsx",
-      demo_url: "",
-      preview_url: "",
-      tailwind_config_url: null,
-      global_css_url: null,
-      version: "1.0.0",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "testimonials-01",
-      name: "Testimonials Carousel",
-      slug: "testimonials-carousel",
-      description: "Animated testimonials carousel with star ratings, avatars, and auto-play",
-      author: "Saturday",
-      author_username: "saturday-framework",
-      downloads: 0,
-      likes: 0,
-      tags: ["testimonials", "carousel", "ratings", "animated", "social-proof"],
-      categories: ["testimonials", "social-proof"],
-      dependencies: { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
-      devDependencies: {},
-      license: "MIT",
-      source: "curated",
-      code_url: "https://raw.githubusercontent.com/nhprince/saturday/main/ui/components/testimonials-carousel.tsx",
-      demo_url: "",
-      preview_url: "",
-      tailwind_config_url: null,
-      global_css_url: null,
-      version: "1.0.0",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "pricing-01",
-      name: "Pricing Cards",
-      slug: "pricing-cards",
-      description: "Pricing cards with toggle (monthly/yearly), feature lists, and highlighted plan",
-      author: "Saturday",
-      author_username: "saturday-framework",
-      downloads: 0,
-      likes: 0,
-      tags: ["pricing", "cards", "toggle", "saas", "billing"],
-      categories: ["pricing", "saas"],
-      dependencies: { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
-      devDependencies: {},
-      license: "MIT",
-      source: "curated",
-      code_url: "https://raw.githubusercontent.com/nhprince/saturday/main/ui/components/pricing-cards.tsx",
-      demo_url: "",
-      preview_url: "",
-      tailwind_config_url: null,
-      global_css_url: null,
-      version: "1.0.0",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "cta-01",
-      name: "CTA Section — Bold",
-      slug: "cta-bold",
-      description: "Bold call-to-action section with gradient background and animated buttons",
-      author: "Saturday",
-      author_username: "saturday-framework",
-      downloads: 0,
-      likes: 0,
-      tags: ["cta", "gradient", "animated", "conversion"],
-      categories: ["cta", "conversion"],
-      dependencies: { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
-      devDependencies: {},
-      license: "MIT",
-      source: "curated",
-      code_url: "https://raw.githubusercontent.com/nhprince/saturday/main/ui/components/cta-bold.tsx",
-      demo_url: "",
-      preview_url: "",
-      tailwind_config_url: null,
-      global_css_url: null,
-      version: "1.0.0",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    {
-      id: "auth-01",
-      name: "Auth Forms — Login/Register",
-      slug: "auth-forms",
-      description: "Login and register forms with validation, social auth buttons, and dark mode",
-      author: "Saturday",
-      author_username: "saturday-framework",
-      downloads: 0,
-      likes: 0,
-      tags: ["auth", "forms", "login", "register", "validation", "social-auth"],
-      categories: ["auth", "forms"],
-      dependencies: { "react-hook-form": "^7.50.0", "@hookform/resolvers": "^3.3.0", "zod": "^3.22.0", "lucide-react": "^0.400.0" },
-      devDependencies: {},
-      license: "MIT",
-      source: "curated",
-      code_url: "https://raw.githubusercontent.com/nhprince/saturday/main/ui/components/auth-forms.tsx",
-      demo_url: "",
-      preview_url: "",
-      tailwind_config_url: null,
-      global_css_url: null,
-      version: "1.0.0",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-  ];
+  // Read from the registry.json file (single source of truth)
+  try {
+    const registryPath = join(__dirname, "..", "..", "..", "ui", "registry.json");
+    if (existsSync(registryPath)) {
+      const raw = readFileSync(registryPath, "utf-8");
+      const registry = JSON.parse(raw);
+      const components: UiComponent[] = registry.components.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        slug: c.slug,
+        description: c.description,
+        author: c.author,
+        author_username: c.author_username,
+        downloads: 0,
+        likes: 0,
+        tags: c.tags || [],
+        categories: [],
+        dependencies: c.dependencies || {},
+        devDependencies: {},
+        license: c.license || "MIT",
+        source: c.source || "curated",
+        code_url: `https://raw.githubusercontent.com/nhprince/saturday/main/ui/components/${c.file}`,
+        demo_url: "",
+        preview_url: "",
+        tailwind_config_url: null,
+        global_css_url: null,
+        version: "1.0.0",
+        created_at: registry.last_updated || new Date().toISOString(),
+        updated_at: registry.last_updated || new Date().toISOString(),
+      }));
 
-  const categories: Record<string, number> = {};
-  curated.forEach((c) => {
-    (c.tags || []).forEach((tag) => {
-      categories[tag] = (categories[tag] || 0) + 1;
-    });
-  });
+      const categories: Record<string, number> = {};
+      components.forEach((c: UiComponent) => {
+        (c.tags || []).forEach((tag) => {
+          categories[tag] = (categories[tag] || 0) + 1;
+        });
+      });
+
+      return {
+        version: registry.version || "1.0.0",
+        last_synced: new Date().toISOString(),
+        source: "curated",
+        components,
+        categories,
+      };
+    }
+  } catch {
+    // Fall through to empty
+  }
 
   return {
     version: "1.0.0",
     last_synced: new Date().toISOString(),
     source: "curated",
-    components: curated,
-    categories,
+    components: [],
+    categories: {},
   };
 }
 
@@ -494,29 +317,39 @@ export async function installUiComponent(comp: UiComponent, targetDir?: string):
   }
 
   // Check if already installed
-  const installed = await listInstalledUiComponents();
+  const installed = await listInstalledUiComponents(projectRoot);
   if (installed.some((c) => c.slug === comp.slug)) {
     throw new Error(`Component already installed: ${comp.name}. Use 'saturday ui remove ${comp.slug}' first.`);
   }
 
-  // Download component code
+  // Get component code — from local template, URL, or generated stub
   let code = "";
-  if (comp.code_url) {
+
+  // 1. Try local template file (for curated components)
+  // The registry "file" field is like "ui/components/HeroGradient.tsx"
+  // We resolve relative to the repo root (2 levels up from cli/src/lib/)
+  const repoRoot = join(__dirname, "..", "..", "..");
+  const templateFromRegistry = comp.id ? join(repoRoot, "ui", "components", getComponentFileName(comp.id)) : null;
+
+  if (templateFromRegistry && existsSync(templateFromRegistry)) {
+    code = readFileSync(templateFromRegistry, "utf-8");
+  } else if (comp.code_url && comp.code_url.startsWith("http")) {
+    // 2. Try downloading from URL (for 21st.dev components)
     try {
       const response = await fetch(comp.code_url, { signal: AbortSignal.timeout(15000) });
       if (response.ok) {
         code = await response.text();
       }
     } catch {
-      // If download fails, generate from template
       code = generateComponentTemplate(comp);
     }
   } else {
+    // 3. Generate stub
     code = generateComponentTemplate(comp);
   }
 
-  // Write component file
-  const fileName = `${comp.slug}.tsx`;
+  // Write component file — use PascalCase name for the file
+  const fileName = getComponentFileName(comp.id);
   writeFileSync(join(componentsDir, fileName), code);
 
   // Download tailwind config extension if available
@@ -541,7 +374,7 @@ export async function installUiComponent(comp: UiComponent, targetDir?: string):
     } catch { /* ignore */ }
   }
 
-  // Update installed list
+  // Update installed list — write to project-local file
   const installedComp: InstalledComponent = {
     name: comp.name,
     slug: comp.slug,
@@ -551,16 +384,32 @@ export async function installUiComponent(comp: UiComponent, targetDir?: string):
     files: [fileName],
   };
 
-  const installedList = await listInstalledUiComponents();
+  const installedList = await listInstalledUiComponents(projectRoot);
   installedList.push(installedComp);
-  ensureUiDirs();
-  writeFileSync(UI_INSTALLED_FILE, JSON.stringify(installedList, null, 2));
+  const projectInstalledFile = join(componentsDir, ".installed.json");
+  writeFileSync(projectInstalledFile, JSON.stringify(installedList, null, 2));
 
   // Write component metadata for agent reference
   writeFileSync(
     join(componentsDir, `${comp.slug}.meta.json`),
     JSON.stringify(comp, null, 2)
   );
+}
+
+function getComponentFileName(id: string): string {
+  // Map component IDs to their PascalCase file names
+  const nameMap: Record<string, string> = {
+    "hero-01": "HeroGradient.tsx",
+    "hero-02": "HeroMinimal.tsx",
+    "features-01": "FeaturesGrid.tsx",
+    "navbar-01": "NavbarGlass.tsx",
+    "footer-01": "FooterModern.tsx",
+    "testimonials-01": "TestimonialsCarousel.tsx",
+    "pricing-01": "PricingCards.tsx",
+    "cta-01": "CtaBold.tsx",
+    "auth-01": "AuthForms.tsx",
+  };
+  return nameMap[id] || `${id}.tsx`;
 }
 
 function generateComponentTemplate(comp: UiComponent): string {
@@ -605,8 +454,9 @@ export default function ${componentName}({ className = "" }: ${componentName}Pro
 export async function removeUiComponent(slug: string, targetDir?: string): Promise<boolean> {
   const projectRoot = targetDir || process.cwd();
   const componentsDir = join(projectRoot, "src", "components", "ui");
+  const projectInstalledFile = join(componentsDir, ".installed.json");
 
-  const installed = await listInstalledUiComponents();
+  const installed = await listInstalledUiComponents(projectRoot);
   const idx = installed.findIndex((c) => c.slug === slug);
   if (idx === -1) return false;
 
@@ -618,19 +468,22 @@ export async function removeUiComponent(slug: string, targetDir?: string): Promi
     if (existsSync(filePath)) {
       rmSync(filePath);
     }
-    // Also remove meta and css files
-    const metaFile = join(componentsDir, `${comp.slug}.meta.json`);
-    const cssFile = join(componentsDir, `${comp.slug}.css`);
-    const twFile = join(componentsDir, `${comp.slug}.tailwind.config.js`);
-    if (existsSync(metaFile)) rmSync(metaFile);
-    if (existsSync(cssFile)) rmSync(cssFile);
-    if (existsSync(twFile)) rmSync(twFile);
+    // Also remove meta and css files — try both PascalCase and kebab-case
+    const baseName = file.replace(".tsx", "");
+    const slugName = comp.slug;
+    for (const name of [baseName, slugName]) {
+      const metaFile = join(componentsDir, `${name}.meta.json`);
+      const cssFile = join(componentsDir, `${name}.css`);
+      const twFile = join(componentsDir, `${name}.tailwind.config.js`);
+      if (existsSync(metaFile)) rmSync(metaFile);
+      if (existsSync(cssFile)) rmSync(cssFile);
+      if (existsSync(twFile)) rmSync(twFile);
+    }
   });
 
   // Update installed list
   installed.splice(idx, 1);
-  ensureUiDirs();
-  writeFileSync(UI_INSTALLED_FILE, JSON.stringify(installed, null, 2));
+  writeFileSync(projectInstalledFile, JSON.stringify(installed, null, 2));
 
   return true;
 }
@@ -639,19 +492,16 @@ export async function removeUiComponent(slug: string, targetDir?: string): Promi
 
 export async function listInstalledUiComponents(targetDir?: string): Promise<InstalledComponent[]> {
   const projectRoot = targetDir || process.cwd();
-  const installedFile = join(projectRoot, ".saturday", "ui-installed.json");
+  // Project-local installed list takes priority
+  const projectInstalledFile = join(projectRoot, "src", "components", "ui", ".installed.json");
+  const globalInstalledFile = join(projectRoot, ".saturday", "ui-installed.json");
 
-  if (existsSync(installedFile)) {
-    try {
-      return JSON.parse(readFileSync(installedFile, "utf-8"));
-    } catch { /* ignore */ }
-  }
-
-  // Also check global installed list
-  if (existsSync(UI_INSTALLED_FILE)) {
-    try {
-      return JSON.parse(readFileSync(UI_INSTALLED_FILE, "utf-8"));
-    } catch { /* ignore */ }
+  for (const file of [projectInstalledFile, globalInstalledFile]) {
+    if (existsSync(file)) {
+      try {
+        return JSON.parse(readFileSync(file, "utf-8"));
+      } catch { /* ignore */ }
+    }
   }
 
   return [];
