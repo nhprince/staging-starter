@@ -2,7 +2,7 @@
 
 # ✦ Saturday Framework
 
-**Build any web project. 100% free. Fully automated.**
+**Build any web project. 100% free. Fully automated. AI-powered.**
 
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-F6821F?logo=cloudflare&logoColor=white)](https://cloudflare.com)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?logo=next.js&logoColor=white)](https://nextjs.org)
@@ -10,7 +10,7 @@
 [![D1](https://img.shields.io/badge/D1-SQLite-00A9FF)](https://developers.cloudflare.com/d1/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[Quick Start](#-quick-start) · [Commands](#-commands) · [Scaffolds](#-scaffolds) · [Docs](FRAMEWORK.md) · [UX Plan](UX_PLAN.md)
+[Quick Start](#-quick-start) · [Commands](#-commands) · [Scaffolds](#-scaffolds) · [Modules](#-modules) · [Docs](FRAMEWORK.md)
 
 </div>
 
@@ -51,7 +51,8 @@ Saturday is a **full-stack web development framework** where:
 - **🤖 Agent-Driven** — Built for AI agents. Every command works non-interactively with `--yes` and `--json` flags
 - **💰 100% Free** — Cloudflare free tier handles everything. No credit card needed
 - **⚡ Edge-First** — Your app runs at 300+ locations worldwide via Cloudflare
-- **🎨 Beautiful Design** — Dark theme with glassmorphism, gradient accents, micro-animations
+- **🎨 21st.dev Components** — Browse and install thousands of React/Tailwind components via `saturday ui`
+- **📦 Modular** — CMS, Auth, Comments, Payments, Email — pick what you need
 - **🔄 Auto Deploy** — Push to `main` → GitHub Actions builds → deploys to Cloudflare
 - **🔒 Secure** — HTTPS enforced, security headers automatic, D1 database with encryption
 
@@ -67,6 +68,7 @@ Saturday is a **full-stack web development framework** where:
 | **Storage** | Cloudflare KV + R2 | Key-value and object storage |
 | **Deployment** | Cloudflare Pages + Workers | Automatic via GitHub Actions |
 | **CLI** | TypeScript/Node.js | Cross-platform, agent-friendly |
+| **UI Components** | 21st.dev + Tailwind CSS | Community-driven component library |
 
 **100% free on Cloudflare's free tier.**
 
@@ -84,6 +86,19 @@ saturday status                 # Show project status
 saturday verify                 # Verify deployment health
 saturday rollback               # Rollback to previous deployment
 saturday destroy <name>         # Remove project completely
+```
+
+### UI Components (21st.dev)
+
+```bash
+saturday ui browse              # Browse components interactively
+saturday ui search <query>      # Search for components
+saturday ui add <slug>          # Install a component
+saturday ui list                # List installed components
+saturday ui remove <slug>       # Remove a component
+saturday ui sync                # Sync component cache
+saturday ui categories          # List categories
+saturday ui info <slug>         # Component details
 ```
 
 ### Configuration
@@ -130,12 +145,39 @@ Pre-built project templates. Each includes frontend, backend, database schema, a
 
 | Scaffold | Status | Description |
 |----------|--------|-------------|
-| **Blog** | ✅ Complete | Full blog with posts, categories, tags, MDX |
-| **Landing** | ✅ Complete | Marketing page with hero, features, contact form |
-| **Portfolio** | ✅ Complete | Developer portfolio with projects, skills, experience |
-| **SaaS** | 📝 Planned | SaaS application with auth, payments, dashboard |
-| **API** | 📝 Planned | RESTful API with documentation |
-| **E-commerce** | 📝 Planned | Online store with Stripe payments |
+| **Landing** | ✅ Complete | Marketing page with hero, features, testimonials, pricing, CTA |
+| **Blog** | ✅ Complete | Full blog with CMS-powered posts, search, categories |
+| **Portfolio** | ✅ Complete | Developer portfolio with projects, skills, experience, contact |
+| **SaaS** | ✅ Complete | SaaS with teams, subscriptions, usage tracking |
+| **E-commerce** | ✅ Complete | Online store with products, orders, coupons, Stripe |
+| **API** | ✅ Complete | RESTful API scaffold with generic CRUD helper |
+
+---
+
+## 🧩 Modules
+
+Pluggable backend modules. Copy into your project to add functionality.
+
+| Module | Description | Backend | Database |
+|--------|-------------|---------|----------|
+| **CMS** | Headless CMS with content types, entries, media library | ✅ | ✅ |
+| **AuthJS** | JWT authentication with signup/login/refresh | ✅ | ✅ |
+| **Comments** | Nested comments with moderation | ✅ | ✅ |
+| **Payments** | Stripe checkout, subscriptions, webhooks | ✅ | ✅ |
+| **Email** | Transactional emails via Resend | ✅ | — |
+
+### Using Modules
+
+```bash
+# Copy a module into your project
+cp -r modules/cms/backend/* ~/projects/my-project/backend/src/routes/
+cp modules/cms/schema.sql ~/projects/my-project/database/
+
+# Mount the router in your Worker
+# In backend/src/index.ts:
+import { cmsRouter } from "./routes/cms";
+app.route("/api/cms", cmsRouter());
+```
 
 ---
 
@@ -147,9 +189,11 @@ my-project/
 ├── frontend/              # Next.js 14 (static export)
 │   ├── src/app/           # App Router pages
 │   ├── src/components/    # React components
+│   ├── src/components/ui/ # 21st.dev installed components
 │   └── out/               # Static export output
 ├── backend/               # Hono on Cloudflare Workers
 │   ├── src/index.ts       # Worker entry point
+│   ├── src/routes/        # Module routes (CMS, Auth, etc.)
 │   └── wrangler.toml      # Worker configuration
 ├── database/
 │   └── schema.sql         # D1 database schema
@@ -198,6 +242,7 @@ saturday verify --json
 - [Framework Architecture](FRAMEWORK.md) — Detailed technical documentation
 - [UX Enhancement Plan](UX_PLAN.md) — UX research and implementation plan
 - [Implementation Plan](PLAN.md) — 12-phase development plan
+- [Server Setup Guide](https://github.com/nhprince/server-setup-guide) — AI VPS setup
 
 ---
 
