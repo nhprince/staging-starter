@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "@21st-dev/magic": {
+      "command": "npx",
+      "args": ["-y", "@21st-dev/magic@latest"],
+      "description": "21st.dev Magic MCP — Browse and install UI components from the 21st.dev marketplace",
+      "homepage": "https://21st.dev/magic"
+    }
+  }
+}

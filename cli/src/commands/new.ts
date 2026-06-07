@@ -30,6 +30,8 @@ export function registerNewCommand(program: Command) {
     .option("--db <type>", `Database: ${DATABASE_TYPES.join(", ")}`)
     .option("--auth <type>", `Auth: ${AUTH_TYPES.join(", ")}`)
     .option("--modules <items...>", `Modules: ${MODULE_TYPES.join(", ")}`)
+    .option("--ui-components", "Install recommended UI components from 21st.dev")
+    .option("--no-ui-components", "Skip UI component installation")
     .option("--no-github", "Skip GitHub repo creation")
     .option("--no-cloudflare", "Skip Cloudflare setup")
     .action(async (type: string, name: string, options: any) => {
@@ -77,6 +79,8 @@ export function registerNewCommand(program: Command) {
         let auth: AuthType;
         let modules: ModuleType[];
 
+        let uiComponents = false;
+
         if (process.env.SATURDAY_YES) {
           // Non-interactive: use flags or defaults
           frontend = (options.frontend as FrontendType) || defaults.frontend;
@@ -84,6 +88,7 @@ export function registerNewCommand(program: Command) {
           db = (options.db as DatabaseType) || defaults.database;
           auth = (options.auth as AuthType) || defaults.auth;
           modules = (options.modules as ModuleType[]) || moduleDefaults;
+          uiComponents = options.uiComponents === true;
         } else {
           // Interactive mode
           out("");
@@ -126,6 +131,12 @@ export function registerNewCommand(program: Command) {
               choices: MODULE_TYPES.filter((m) => moduleDefaults.includes(m)),
               default: moduleDefaults,
             },
+            {
+              type: "confirm",
+              name: "uiComponents",
+              message: "Install recommended UI components from 21st.dev?",
+              default: true,
+            },
           ]);
 
           frontend = answers.frontend;
@@ -133,6 +144,7 @@ export function registerNewCommand(program: Command) {
           db = answers.db;
           auth = answers.auth;
           modules = answers.modules;
+          const uiComponents = answers.uiComponents;
         }
 
         // Summary
@@ -157,6 +169,37 @@ export function registerNewCommand(program: Command) {
         });
 
         success(`Project scaffolded: ${pDir}`);
+
+        // Install UI components from 21st.dev
+        if (uiComponents) {
+          out("");
+          info("🎨 Installing recommended UI components from 21st.dev...");
+
+          const { getUiCache, syncUiCache, installUiComponent, getUiComponent, searchUiComponents } = await import("../lib/ui.js");
+          await syncUiCache("curated");
+
+          // Get recommended components for this project type
+          const { readFileSync } = await import("fs");
+          const { join } = await import("path");
+          const registryPath = join(__dirname, "..", "..", "ui", "registry.json");
+          const registry = JSON.parse(readFileSync(registryPath, "utf-8"));
+          const recommended: string[] = registry.scaffold_recommendations[type as string] || [];
+
+          for (const slug of recommended) {
+            try {
+              const comp = await getUiComponent(slug, { source: "curated" });
+              if (comp) {
+                await installUiComponent(comp, pDir);
+                success(`  ✅ ${comp.name}`);
+              }
+            } catch (err: any) {
+              warn(`  ⚠️  ${slug}: ${err.message}`);
+            }
+          }
+
+          info("UI components installed to src/components/ui/");
+          info("Run `saturday ui browse` to explore more components.");
+        }
 
         // Create GitHub repo
         if (!options.noGithub) {

@@ -1,0 +1,133 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-06-08",
+  "description": "Saturday Framework — Curated UI Component Registry from 21st.dev",
+  "components": [
+    {
+      "id": "hero-01",
+      "name": "Hero Section — Gradient",
+      "slug": "hero-gradient",
+      "description": "A stunning gradient hero section with CTA buttons, animated background, and responsive layout",
+      "author": "Saturday",
+      "author_username": "saturday-framework",
+      "tags": ["hero", "landing", "gradient", "cta", "animated"],
+      "dependencies": { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
+      "license": "MIT",
+      "source": "curated"
+    },
+    {
+      "id": "hero-02",
+      "name": "Hero Section — Minimal",
+      "slug": "hero-minimal",
+      "description": "Clean minimal hero with typography focus, subtle animations, and dark mode support",
+      "author": "Saturday",
+      "author_username": "saturday-framework",
+      "tags": ["hero", "landing", "minimal", "typography", "dark-mode"],
+      "dependencies": { "framer-motion": "^11.0.0" },
+      "license": "MIT",
+      "source": "curated"
+    },
+    {
+      "id": "features-01",
+      "name": "Features Grid",
+      "slug": "features-grid",
+      "description": "Responsive features grid with icons, hover effects, and staggered animations",
+      "author": "Saturday",
+      "author_username": "saturday-framework",
+      "tags": ["features", "grid", "icons", "hover", "animated"],
+      "dependencies": { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
+      "license": "MIT",
+      "source": "curated"
+    },
+    {
+      "id": "navbar-01",
+      "name": "Navigation Bar — Glassmorphism",
+      "slug": "navbar-glass",
+      "description": "Glassmorphism navbar with blur effect, mobile menu, and scroll-aware styling",
+      "author": "Saturday",
+      "author_username": "saturday-framework",
+      "tags": ["navbar", "navigation", "glassmorphism", "mobile", "responsive"],
+      "dependencies": { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
+      "license": "MIT",
+      "source": "curated"
+    },
+    {
+      "id": "footer-01",
+      "name": "Footer — Modern",
+      "slug": "footer-modern",
+      "description": "Modern footer with links, social icons, newsletter signup, and multi-column layout",
+      "author": "Saturday",
+      "author_username": "saturday-framework",
+      "tags": ["footer", "links", "social", "newsletter", "responsive"],
+      "dependencies": { "lucide-react": "^0.400.0" },
+      "license": "MIT",
+      "source": "curated"
+    },
+    {
+      "id": "testimonials-01",
+      "name": "Testimonials Carousel",
+      "slug": "testimonials-carousel",
+      "description": "Animated testimonials carousel with star ratings, avatars, and auto-play",
+      "author": "Saturday",
+      "author_username": "saturday-framework",
+      "tags": ["testimonials", "carousel", "ratings", "animated", "social-proof"],
+      "dependencies": { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
+      "license": "MIT",
+      "source": "curated"
+    },
+    {
+      "id": "pricing-01",
+      "name": "Pricing Cards",
+      "slug": "pricing-cards",
+      "description": "Pricing cards with toggle (monthly/yearly), feature lists, and highlighted plan",
+      "author": "Saturday",
+      "author_username": "saturday-framework",
+      "tags": ["pricing", "cards", "toggle", "saas", "billing"],
+      "dependencies": { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
+      "license": "MIT",
+      "source": "curated"
+    },
+    {
+      "id": "cta-01",
+      "name": "CTA Section — Bold",
+      "slug": "cta-bold",
+      "description": "Bold call-to-action section with gradient background and animated buttons",
+      "author": "Saturday",
+      "author_username": "saturday-framework",
+      "tags": ["cta", "gradient", "animated", "conversion"],
+      "dependencies": { "framer-motion": "^11.0.0", "lucide-react": "^0.400.0" },
+      "license": "MIT",
+      "source": "curated"
+    },
+    {
+      "id": "auth-01",
+      "name": "Auth Forms — Login/Register",
+      "slug": "auth-forms",
+      "description": "Login and register forms with validation, social auth buttons, and dark mode",
+      "author": "Saturday",
+      "author_username": "saturday-framework",
+      "tags": ["auth", "forms", "login", "register", "validation", "social-auth"],
+      "dependencies": { "react-hook-form": "^7.50.0", "@hookform/resolvers": "^3.3.0", "zod": "^3.22.0", "lucide-react": "^0.400.0" },
+      "license": "MIT",
+      "source": "curated"
+    }
+  ],
+  "categories": {
+    "hero": ["hero-gradient", "hero-minimal"],
+    "features": ["features-grid"],
+    "navigation": ["navbar-glass"],
+    "footer": ["footer-modern"],
+    "testimonials": ["testimonials-carousel"],
+    "pricing": ["pricing-cards"],
+    "cta": ["cta-bold"],
+    "auth": ["auth-forms"]
+  },
+  "scaffold_recommendations": {
+    "landing": ["hero-gradient", "features-grid", "testimonials-carousel", "cta-bold", "footer-modern"],
+    "saas": ["hero-minimal", "features-grid", "pricing-cards", "auth-forms", "navbar-glass"],
+    "portfolio": ["hero-minimal", "navbar-glass", "footer-modern", "cta-bold"],
+    "blog": ["navbar-glass", "footer-modern", "auth-forms"],
+    "ecommerce": ["hero-gradient", "features-grid", "pricing-cards", "auth-forms", "navbar-glass", "footer-modern"],
+    "api": ["hero-minimal", "navbar-glass", "footer-modern"]
+  }
+}

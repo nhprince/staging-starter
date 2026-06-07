@@ -15,6 +15,7 @@
  *   saturday update                 Update framework
  *   saturday doctor                 Diagnose issues
  *   saturday init                   First-time setup
+ *   saturday ui                     Browse & install UI components from 21st.dev
  * 
  * Agent flags:
  *   --yes       Skip all prompts (non-interactive)
@@ -39,6 +40,7 @@ import { registerSetupCommand } from "./commands/setup.js";
 import { registerUpdateCommand } from "./commands/update.js";
 import { registerDoctorCommand } from "./commands/doctor.js";
 import { registerInitCommand } from "./commands/init.js";
+import { registerUiCommand } from "./commands/ui.js";
 
 const program = new Command();
 
@@ -80,6 +82,7 @@ registerSetupCommand(program);
 registerUpdateCommand(program);
 registerDoctorCommand(program);
 registerInitCommand(program);
+registerUiCommand(program);
 
 // Error handling
 program.exitOverride();
