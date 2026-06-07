@@ -87,7 +87,11 @@ program.exitOverride();
 try {
   program.parse();
 } catch (err: any) {
-  if (err.code === "commander.helpDisplayed" || err.code === "commander.help") {
+  if (
+    err.code === "commander.helpDisplayed" ||
+    err.code === "commander.help" ||
+    err.code === "commander.version"
+  ) {
     process.exit(0);
   }
   if (process.env.SATURDAY_JSON) {
