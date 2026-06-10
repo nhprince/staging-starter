@@ -1,9 +1,22 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FadeDown,
+  ScaleUp,
+  StaggerContainer,
+  StaggerItem,
+  HoverGlow,
+  MorphBackground,
+  PageTransition,
+  MagneticButton,
+  LoadingSpinner,
+  transitions,
+} from "@/components/animations";
 
 /* ═══════════════════════════════════════════════════════════════
-   SATURDAY DASHBOARD — PREMIUM RESPONSIVE
+   SATURDAY DASHBOARD — PREMIUM ANIMATED
    ═══════════════════════════════════════════════════════════════ */
 
 interface Project {
@@ -68,32 +81,59 @@ function ScoreRing({ score, total, size = 100 }: { score: number; total: number;
   const color = pct >= 90 ? "#34d399" : pct >= 70 ? "#fbbf24" : "#f87171";
 
   return (
-    <div className="score-ring" style={{ width: size, height: size }}>
+    <motion.div
+      className="score-ring"
+      style={{ width: size, height: size }}
+      initial={{ scale: 0, rotate: -180 }}
+      whileInView={{ scale: 1, rotate: 0 }}
+      viewport={{ once: true }}
+      transition={{ ...transitions.springBouncy, delay: 0.3 }}
+    >
       <svg width={size} height={size} viewBox="0 0 140 140">
         <circle className="bg" cx="70" cy="70" r={radius} />
-        <circle className="progress" cx="70" cy="70" r={radius}
-          stroke={color} strokeDasharray={circumference} strokeDashoffset={offset}
-          style={{ filter: `drop-shadow(0 0 6px ${color}4D)` }} />
+        <motion.circle
+          className="progress" cx="70" cy="70" r={radius}
+          stroke={color}
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          whileInView={{ strokeDashoffset: offset }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.5, ease: "easeOut", delay: 0.5 }}
+          style={{ filter: `drop-shadow(0 0 6px ${color}4D)` }}
+        />
       </svg>
-      <div className="score-value">
+      <motion.div
+        className="score-value"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.8 }}
+      >
         <span className="text-xl md:text-3xl font-black" style={{ color }}>{pct}%</span>
         <span className="text-[10px] md:text-xs text-[var(--text-muted)] mt-0.5 md:mt-1 font-medium">{score}/{total}</span>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
 /* ─── PROJECT CARD ─────────────────────────────────────────────── */
 
-function ProjectCard({ project, onRunTests }: { project: Project; index: number; onRunTests: (p: Project) => void }) {
+function ProjectCard({ project, index, onRunTests }: { project: Project; index: number; onRunTests: (p: Project) => void }) {
   const statusColors: Record<string, string> = {
     healthy: "var(--accent-green)", warning: "var(--accent-yellow)", error: "var(--accent-red)", unknown: "var(--text-muted)",
   };
 
   return (
-    <div className="glass-card p-4 md:p-5 stagger-item">
+    <motion.div
+      className="glass-card p-4 md:p-5"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ ...transitions.smooth, delay: index * 0.1 }}
+      whileHover={{ y: -4, transition: transitions.spring }}
+    >
       <div className="flex items-start justify-between gap-3 mb-3 md:mb-4">
-        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+        <motion.div className="flex items-center gap-2 md:gap-3 min-w-0" initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 + 0.2 }}>
           <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[var(--gradient-main)] flex items-center justify-center text-white text-xs md:text-sm font-bold flex-shrink-0">
             {project.name[0].toUpperCase()}
           </div>
@@ -101,40 +141,52 @@ function ProjectCard({ project, onRunTests }: { project: Project; index: number;
             <h3 className="font-bold text-sm md:text-base truncate">{project.name}</h3>
             <p className="text-[10px] md:text-xs text-[var(--text-muted)]">{project.type} · {project.lastDeploy}</p>
           </div>
-        </div>
-        <div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0">
-          <span className="dot-pulse" style={{ background: statusColors[project.status] }} />
+        </motion.div>
+        <motion.div className="flex items-center gap-1.5 md:gap-2 flex-shrink-0" initial={{ opacity: 0, scale: 0.8 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: index * 0.1 + 0.3 }}>
+          <motion.span
+            className="dot-pulse"
+            style={{ background: statusColors[project.status] }}
+            animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
           <span className="text-[10px] md:text-xs font-medium capitalize" style={{ color: statusColors[project.status] }}>
             {project.status}
           </span>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 md:gap-3 mb-3 md:mb-4">
+      <motion.div className="grid grid-cols-3 gap-2 md:gap-3 mb-3 md:mb-4" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: index * 0.1 + 0.4 }}>
         {[
           { val: project.testsPassed, label: "Tests Passed", color: "var(--accent-green)" },
           { val: project.testsTotal, label: "Total Tests", color: "var(--accent-indigo)" },
           { val: `${Math.round((project.testsPassed / project.testsTotal) * 100)}%`, label: "Health", color: "var(--accent-purple)" },
         ].map((s, i) => (
-          <div key={i} className="text-center p-2 md:p-3 rounded-lg bg-white/5">
+          <motion.div
+            key={i}
+            className="text-center p-2 md:p-3 rounded-lg bg-white/5"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1 + 0.5 + i * 0.1 }}
+          >
             <div className="text-base md:text-lg font-bold" style={{ color: s.color }}>{s.val}</div>
             <div className="text-[9px] md:text-[10px] text-[var(--text-muted)]">{s.label}</div>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      <div className="project-card-actions">
-        <button onClick={() => onRunTests(project)} className="btn-primary text-[10px] md:text-xs flex-1 px-3 md:px-4 py-2 md:py-2.5">
+      <motion.div className="project-card-actions" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: index * 0.1 + 0.7 }}>
+        <MagneticButton onClick={() => onRunTests(project)} className="btn-primary text-[10px] md:text-xs flex-1 px-3 md:px-4 py-2 md:py-2.5">
           ▶ Run Tests
-        </button>
-        <a href={project.frontendUrl} target="_blank" rel="noreferrer" className="btn-primary text-[10px] md:text-xs px-2.5 md:px-3 py-2 md:py-2.5" aria-label="View frontend">
+        </MagneticButton>
+        <motion.a href={project.frontendUrl} target="_blank" rel="noreferrer" className="btn-primary text-[10px] md:text-xs px-2.5 md:px-3 py-2 md:py-2.5" aria-label="View frontend" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={transitions.spring}>
           🌐
-        </a>
-        <a href={project.githubUrl} target="_blank" rel="noreferrer" className="btn-primary text-[10px] md:text-xs px-2.5 md:px-3 py-2 md:py-2.5" aria-label="View GitHub">
+        </motion.a>
+        <motion.a href={project.githubUrl} target="_blank" rel="noreferrer" className="btn-primary text-[10px] md:text-xs px-2.5 md:px-3 py-2 md:py-2.5" aria-label="View GitHub" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={transitions.spring}>
           📦
-        </a>
-      </div>
-    </div>
+        </motion.a>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -211,41 +263,62 @@ function TestModal({ project, onClose }: { project: Project; onClose: () => void
   }, [project.backendUrl]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="glass-card p-4 md:p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-4 bg-black/60 backdrop-blur-sm"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        className="glass-card p-4 md:p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto"
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 20 }}
+        transition={transitions.spring}
+        onClick={e => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-3 md:mb-4">
           <h2 className="text-base md:text-lg font-bold">Tests: {project.name}</h2>
-          <button onClick={onClose} className="text-[var(--text-muted)] hover:text-white text-lg md:text-xl p-1" aria-label="Close">✕</button>
+          <MagneticButton onClick={onClose} className="text-[var(--text-muted)] hover:text-white text-lg md:text-xl p-1" aria-label="Close">✕</MagneticButton>
         </div>
 
         {tests.length === 0 ? (
-          <div className="text-center py-6 md:py-8">
+          <motion.div className="text-center py-6 md:py-8" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
             <p className="text-xs md:text-sm text-[var(--text-secondary)] mb-3 md:mb-4">Click to run diagnostics</p>
-            <button onClick={runTests} className="btn-primary text-xs md:text-sm" disabled={running}>
-              {running ? <span className="spinner" /> : "▶ Run Tests"}
-            </button>
-          </div>
+            <MagneticButton onClick={runTests} className="btn-primary text-xs md:text-sm" disabled={running}>
+              {running ? <LoadingSpinner /> : "▶ Run Tests"}
+            </MagneticButton>
+          </motion.div>
         ) : (
           <div className="flex flex-col gap-2">
-            {tests.map((test, i) => (
-              <div key={i} className={`test-card status-${test.status}`}>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-xs md:text-sm">{test.name}</span>
-                  <span className={`status-badge status-${test.status} text-[9px] md:text-[10px]`}>
-                    {test.status === "pass" ? "✓" : test.status === "fail" ? "✕" : test.status === "warn" ? "⚠" : "●"}
-                    {" "}{test.status}
-                  </span>
-                </div>
-                <p className="text-[10px] md:text-xs text-[var(--text-secondary)] mt-1">{test.message}</p>
-              </div>
-            ))}
-            <button onClick={runTests} className="btn-primary text-[10px] md:text-xs mt-2" disabled={running}>
-              {running ? <span className="spinner" /> : "↻ Re-run Tests"}
-            </button>
+            <AnimatePresence>
+              {tests.map((test, i) => (
+                <motion.div
+                  key={i}
+                  className={`test-card status-${test.status}`}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-xs md:text-sm">{test.name}</span>
+                    <span className={`status-badge status-${test.status} text-[9px] md:text-[10px]`}>
+                      {test.status === "pass" ? "✓" : test.status === "fail" ? "✕" : test.status === "warn" ? "⚠" : "●"}
+                      {" "}{test.status}
+                    </span>
+                  </div>
+                  <p className="text-[10px] md:text-xs text-[var(--text-secondary)] mt-1">{test.message}</p>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            <MagneticButton onClick={runTests} className="btn-primary text-[10px] md:text-xs mt-2" disabled={running}>
+              {running ? <LoadingSpinner /> : "↻ Re-run Tests"}
+            </MagneticButton>
           </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -266,104 +339,176 @@ export default function Home() {
   const totalTests = projects.reduce((s, p) => s + p.testsTotal, 0);
 
   return (
-    <div className="min-h-screen relative">
-      <div className="bg-mesh" />
-      <div className="relative z-10">
+    <PageTransition>
+      <div className="min-h-screen relative">
+        <MorphBackground />
 
-        {/* Header */}
-        <header className="dashboard-header">
-          <div className="dashboard-container">
-            <div className="dashboard-header-inner">
-              <div className="flex items-center gap-2 md:gap-3 min-w-0">
-                <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-[var(--gradient-main)] flex items-center justify-center text-white text-xs md:text-sm font-bold shadow-lg shadow-indigo-500/20 flex-shrink-0">✦</div>
-                <div className="min-w-0">
-                  <h1 className="text-sm md:text-base lg:text-lg font-bold tracking-tight truncate">Project Dashboard</h1>
-                  <p className="text-[10px] md:text-[11px] text-[var(--text-muted)]">
-                    {projects.length} projects
-                    {backendHealth ? (
-                      <span className="ml-1.5 md:ml-2 inline-flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                        <span className="hidden sm:inline">Backend online</span>
-                      </span>
-                    ) : API_URL ? (
-                      <span className="ml-1.5 md:ml-2 inline-flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
-                        <span className="hidden sm:inline">Backend unreachable</span>
-                      </span>
-                    ) : null}
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-1.5 md:gap-2 flex-shrink-0">
-                {(["projects", "tests"] as const).map(tab => (
-                  <button key={tab} onClick={() => setActiveTab(tab)}
-                    className={`text-[10px] md:text-xs px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg transition-colors capitalize ${activeTab === tab ? "bg-[var(--accent-indigo)] text-white" : "bg-white/5 text-[var(--text-secondary)] hover:bg-white/10"}`}>
-                    {tab}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Main */}
-        <main className="dashboard-container py-4 md:py-6 lg:py-8">
-          {activeTab === "projects" ? (
-            <>
-              {/* Stats */}
-              <div className="stats-grid mb-4 md:mb-6">
-                {[
-                  { val: projects.filter(p => p.status === "healthy").length, label: "Healthy", color: "var(--accent-green)" },
-                  { val: projects.filter(p => p.status === "warning").length, label: "Warnings", color: "var(--accent-yellow)" },
-                  { val: projects.filter(p => p.status === "error").length, label: "Errors", color: "var(--accent-red)" },
-                ].map((s, i) => (
-                  <div key={i} className="glass-card p-3 md:p-4 text-center">
-                    <div className="text-xl md:text-2xl font-bold" style={{ color: s.color }}>{s.val}</div>
-                    <div className="text-[10px] md:text-xs text-[var(--text-muted)]">{s.label}</div>
+        <div className="relative z-10">
+          {/* Header */}
+          <motion.header
+            className="dashboard-header"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={transitions.smooth}
+          >
+            <div className="dashboard-container">
+              <div className="dashboard-header-inner">
+                <FadeDown className="flex items-center gap-2 md:gap-3 min-w-0">
+                  <motion.div
+                    className="w-7 h-7 md:w-9 md:h-9 rounded-lg md:rounded-xl bg-[var(--gradient-main)] flex items-center justify-center text-white text-xs md:text-sm font-bold shadow-lg shadow-indigo-500/20 flex-shrink-0"
+                    whileHover={{ rotate: 15, scale: 1.1 }}
+                    transition={transitions.spring}
+                  >
+                    ✦
+                  </motion.div>
+                  <div className="min-w-0">
+                    <h1 className="text-sm md:text-base lg:text-lg font-bold tracking-tight truncate">Project Dashboard</h1>
+                    <p className="text-[10px] md:text-[11px] text-[var(--text-muted)]">
+                      {projects.length} projects
+                      {backendHealth ? (
+                        <span className="ml-1.5 md:ml-2 inline-flex items-center gap-1">
+                          <motion.span
+                            className="w-1.5 h-1.5 rounded-full bg-green-400"
+                            animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          />
+                          <span className="hidden sm:inline">Backend online</span>
+                        </span>
+                      ) : API_URL ? (
+                        <span className="ml-1.5 md:ml-2 inline-flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+                          <span className="hidden sm:inline">Backend unreachable</span>
+                        </span>
+                      ) : null}
+                    </p>
                   </div>
-                ))}
-              </div>
+                </FadeDown>
 
-              {/* Projects */}
-              <div className="flex flex-col gap-3 md:gap-4">
-                {projects.map((project, i) => (
-                  <ProjectCard key={project.id} project={project} index={i} onRunTests={setTestingProject} />
-                ))}
+                <FadeDown delay={0.1} className="flex gap-1.5 md:gap-2 flex-shrink-0">
+                  {(["projects", "tests"] as const).map(tab => (
+                    <MagneticButton
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`text-[10px] md:text-xs px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg transition-colors capitalize ${activeTab === tab ? "bg-[var(--accent-indigo)] text-white" : "bg-white/5 text-[var(--text-secondary)] hover:bg-white/10"}`}
+                    >
+                      {tab}
+                    </MagneticButton>
+                  ))}
+                </FadeDown>
               </div>
-
-              {/* Empty State */}
-              <div className="glass-card p-6 md:p-8 text-center mt-3 md:mt-4 border-dashed border-2 border-[var(--border-subtle)]">
-                <div className="text-3xl md:text-4xl mb-2 md:mb-3">🚀</div>
-                <h3 className="font-bold text-sm md:text-base mb-1">Create Your First Project</h3>
-                <p className="text-xs md:text-sm text-[var(--text-secondary)] mb-3 md:mb-4">
-                  Tell Saturday: &quot;Build me a blog&quot; or &quot;Create a SaaS&quot;
-                </p>
-                <code className="code-block text-[10px] md:text-xs inline-block">
-                  python3 scripts/new-project.py --type blog --name my-blog
-                </code>
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center pt-4 md:pt-8">
-              <ScoreRing score={totalPassed} total={totalTests} />
-              <p className="text-xs md:text-sm text-[var(--text-secondary)] mt-3 md:mt-4">
-                {totalPassed} of {totalTests} tests passing across all projects
-              </p>
             </div>
-          )}
-        </main>
+          </motion.header>
 
-        {/* Footer */}
-        <footer className="mt-6 md:mt-10 pt-4 md:pt-6 border-t border-[var(--border-subtle)] text-center">
-          <p className="text-[10px] md:text-xs text-[var(--text-muted)]">
-            Built by <span className="font-semibold text-[var(--text-secondary)]">Prince</span> · Powered by{" "}
-            <span className="font-semibold text-[var(--text-secondary)]">Saturday</span> ·{" "}
-            <span className="font-semibold text-[var(--accent-indigo)]">Saturday Framework</span>
-          </p>
-        </footer>
+          {/* Main */}
+          <main className="dashboard-container py-4 md:py-6 lg:py-8">
+            <AnimatePresence mode="wait">
+              {activeTab === "projects" ? (
+                <motion.div
+                  key="projects"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={transitions.smooth}
+                >
+                  {/* Stats */}
+                  <StaggerContainer className="stats-grid mb-4 md:mb-6" staggerChildren={0.1}>
+                    {[
+                      { val: projects.filter(p => p.status === "healthy").length, label: "Healthy", color: "var(--accent-green)" },
+                      { val: projects.filter(p => p.status === "warning").length, label: "Warnings", color: "var(--accent-yellow)" },
+                      { val: projects.filter(p => p.status === "error").length, label: "Errors", color: "var(--accent-red)" },
+                    ].map((s, i) => (
+                      <StaggerItem key={i} variant="scaleUp">
+                        <HoverGlow className="glass-card p-3 md:p-4 text-center cursor-default">
+                          <motion.div
+                            className="text-xl md:text-2xl font-bold"
+                            style={{ color: s.color }}
+                            initial={{ scale: 0 }}
+                            whileInView={{ scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ ...transitions.springBouncy, delay: 0.3 + i * 0.1 }}
+                          >
+                            {s.val}
+                          </motion.div>
+                          <div className="text-[10px] md:text-xs text-[var(--text-muted)]">{s.label}</div>
+                        </HoverGlow>
+                      </StaggerItem>
+                    ))}
+                  </StaggerContainer>
+
+                  {/* Projects */}
+                  <div className="flex flex-col gap-3 md:gap-4">
+                    {projects.map((project, i) => (
+                      <ProjectCard key={project.id} project={project} index={i} onRunTests={setTestingProject} />
+                    ))}
+                  </div>
+
+                  {/* Empty State */}
+                  <motion.div
+                    className="glass-card p-6 md:p-8 text-center mt-3 md:mt-4 border-dashed border-2 border-[var(--border-subtle)]"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.5 }}
+                  >
+                    <motion.div
+                      className="text-3xl md:text-4xl mb-2 md:mb-3"
+                      animate={{ y: [0, -8, 0] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      🚀
+                    </motion.div>
+                    <h3 className="font-bold text-sm md:text-base mb-1">Create Your First Project</h3>
+                    <p className="text-xs md:text-sm text-[var(--text-secondary)] mb-3 md:mb-4">
+                      Tell Saturday: &quot;Build me a blog&quot; or &quot;Create a SaaS&quot;
+                    </p>
+                    <code className="code-block text-[10px] md:text-xs inline-block">
+                      python3 scripts/new-project.py --type blog --name my-blog
+                    </code>
+                  </motion.div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="tests"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={transitions.smooth}
+                  className="flex flex-col items-center pt-4 md:pt-8"
+                >
+                  <ScoreRing score={totalPassed} total={totalTests} />
+                  <motion.p
+                    className="text-xs md:text-sm text-[var(--text-secondary)] mt-3 md:mt-4"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1 }}
+                  >
+                    {totalPassed} of {totalTests} tests passing across all projects
+                  </motion.p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </main>
+
+          {/* Footer */}
+          <motion.footer
+            className="mt-6 md:mt-10 pt-4 md:pt-6 border-t border-[var(--border-subtle)] text-center"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <p className="text-[10px] md:text-xs text-[var(--text-muted)]">
+              Built by <span className="font-semibold text-[var(--text-secondary)]">Prince</span> · Powered by{" "}
+              <span className="font-semibold text-[var(--text-secondary)]">Saturday</span> ·{" "}
+              <span className="font-semibold text-[var(--accent-indigo)]">Saturday Framework</span>
+            </p>
+          </motion.footer>
+        </div>
+
+        <AnimatePresence>
+          {testingProject && <TestModal project={testingProject} onClose={() => setTestingProject(null)} />}
+        </AnimatePresence>
       </div>
-
-      {testingProject && <TestModal project={testingProject} onClose={() => setTestingProject(null)} />}
-    </div>
+    </PageTransition>
   );
 }

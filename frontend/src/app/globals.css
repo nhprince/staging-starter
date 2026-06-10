@@ -390,3 +390,17 @@ body {
 @media (min-width: 48rem) {
   .project-card-actions { gap: 0.5rem; }
 }
+
+/* ─── FRAMER MOTION UTILITIES ─────────────────────────────────── */
+[data-animate] {
+  will-change: transform, opacity;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
