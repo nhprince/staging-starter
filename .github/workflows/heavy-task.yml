@@ -1,0 +1,33 @@
+name: Heavy Task
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Task to run'
+        required: true
+        type: choice
+        options: [install-deps, run-tests, lint-all, generate-types, build-medusa]
+      project:
+        description: 'Project name'
+        required: true
+
+jobs:
+  run-task:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: nhprince/${{ inputs.project }}
+          token: ${{ secrets.GH_PAT }}
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - run: pnpm install
+      - name: Run requested task
+        run: |
+          case "${{ inputs.task }}" in
+            install-deps) echo "Dependencies installed" ;;
+            run-tests) pnpm test ;;
+            lint-all) pnpm lint ;;
+            generate-types) pnpm run generate ;;
+            build-medusa) cd backend && pnpm build ;;
+          esac
